@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:tugasakhir/model/hutangmodel.dart';
 
 class CreatePiutang extends StatefulWidget {
   const CreatePiutang({super.key});
@@ -14,32 +15,36 @@ class CreatePiutang extends StatefulWidget {
 class _CreatePiutangState extends State<CreatePiutang> {
   final _formKey = GlobalKey<FormState>();
   String? namaPeminjam;
+  String? noteleponPeminjam;
   String? nominalDipinjam;
   String? tanggalDipinjam;
+  String? tanggalJatuhTempo;
   String? deskripsi;
   File? _selectedFile;
 
-  final _picker = ImagePicker();
+  // final _picker = ImagePicker();
 
-  Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+  // Future<void> _pickImage() async {
+  //   final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
-    if (pickedFile != null) {
-      setState(() {
-        _selectedFile = File(pickedFile.path);
-      });
-    }
-  }
+  //   if (pickedFile != null) {
+  //     setState(() {
+  //       _selectedFile = File(pickedFile.path);
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
+        backgroundColor: const Color(0xFF24675B),
         title: Text(
           'Tambahkan Piutang',
           style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
       ),
@@ -103,6 +108,53 @@ class _CreatePiutangState extends State<CreatePiutang> {
                           onChanged: (value) {
                             setState(() {
                               namaPeminjam = value;
+                            });
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 10.0,
+                          horizontal: 30.0,
+                        ),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'No. Telepon',
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 300,
+                        child: TextFormField(
+                          decoration: InputDecoration(
+                            hintText: 'Masukkan nomor telepon',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Nomor telepon tidak boleh kosong!';
+                            } else if (value.length < 10 || value.length > 13) {
+                              return 'Nomor telepon harus memiliki panjang 10-13 karakter!';
+                            } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+                              return 'Nomor telepon hanya boleh berisi angka.';
+                            }
+                            return null;
+                          },
+                          onChanged: (value) {
+                            setState(() {
+                              noteleponPeminjam = value;
                             });
                           },
                         ),
@@ -207,6 +259,52 @@ class _CreatePiutangState extends State<CreatePiutang> {
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
+                            'Tanggal Jatuh Tempo',
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 300,
+                        child: TextFormField(
+                          decoration: InputDecoration(
+                            hintText: 'Masukkan tanggal jatuh tempo',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Tanggal Jatuh Tempo tidak boleh kosong!';
+                            } else if (!RegExp(r'^\d{4}-\d{2}-\d{2}$')
+                                .hasMatch(value)) {
+                              return 'Tanggal Jatuh Tempo harus berformat yyyy-mm-dd!';
+                            }
+                            return null;
+                          },
+                          onChanged: (value) {
+                            setState(() {
+                              tanggalJatuhTempo = value;
+                            });
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 10.0,
+                          horizontal: 30.0,
+                        ),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
                             'Deskripsi (Opsional)',
                             style: GoogleFonts.inter(
                               fontSize: 16,
@@ -244,25 +342,17 @@ class _CreatePiutangState extends State<CreatePiutang> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      ElevatedButton.icon(
-                        onPressed: _pickImage,
-                        icon: const Icon(Icons.upload_file),
-                        label: const Text('Upload Gambar'),
-                      ),
-                      if (_selectedFile != null)
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Image.file(
-                            _selectedFile!,
-                            height: 100,
-                            width: 100,
-                          ),
-                        ),
-                      const SizedBox(height: 40),
                       ElevatedButton(
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            // Perform form submission
+                            HutangModel hutangModel = HutangModel(
+                              namaPemberiPinjam: namaPeminjam!,
+                              noteleponPemberiPinjam: noteleponPeminjam!,
+                              nominalPinjam: nominalDipinjam!,
+                              tanggalPinjam: tanggalDipinjam!,
+                              tanggalJatuhTempo: tanggalJatuhTempo!,
+                              deskripsi: deskripsi!,
+                            );
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                   content: Text('Form submitted successfully')),
