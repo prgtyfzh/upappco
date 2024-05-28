@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "63956586291",
+    "project_id": "utangpiutang-63c49",
+    "storage_bucket": "utangpiutang-63c49.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:63956586291:android:084be411a1f2b22dd73846",
+        "android_client_info": {
+          "package_name": "com.example.tugasakhir"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKISRofGcqGG0aGU5mOmG7ulmfIDYiamY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
