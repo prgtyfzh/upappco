@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:tugasakhir/controller/hutangcontroller.dart';
 import 'package:tugasakhir/view/hutang/createhutang.dart';
+import 'package:tugasakhir/view/hutang/detailhutang.dart';
+import 'package:tugasakhir/view/hutang/updatehutang.dart';
 
 class Hutang extends StatefulWidget {
   const Hutang({super.key});
@@ -84,92 +86,95 @@ class _HutangState extends State<Hutang> {
                                 Icons.more_vert,
                                 size: 25,
                               ),
-                              // onSelected: (value) {
-                              //   if (value == 'edit') {
-                              //     Navigator.push(
-                              //       context,
-                              //       MaterialPageRoute(
-                              //         builder: (context) => UpdatePendapatan(
-                              //           pendapatanID: data[index]
-                              //               ['pendapatanID'],
-                              //           namaCust: data[index]['namaCust'],
-                              //           telpCust: data[index]['telpCust'],
-                              //           alamatCust: data[index]['alamatCust'],
-                              //           sepatuCust: data[index]['sepatuCust'],
-                              //           treatment: data[index]['treatment'],
-                              //           tglMasuk: data[index]['tglMasuk'],
-                              //           tglKeluar: data[index]['tglKeluar'],
-                              //           hargaTreatment: data[index]
-                              //               ['hargaTreatment'],
-                              //         ),
-                              //       ),
-                              //     ).then((value) {
-                              //       if (value == true) {
-                              //         setState(() {
-                              //           penc.getPendapatan();
-                              //         });
-                              //       }
-                              //     });
-                              //   } else if (value == 'delete') {
-                              //     showDialog(
-                              //       context: context,
-                              //       builder: (BuildContext context) {
-                              //         return AlertDialog(
-                              //           backgroundColor: Colors.white,
-                              //           title: const Text(
-                              //               'Konfirmasi Penghapusan'),
-                              //           content: const Text(
-                              //               'Yakin ingin menghapus pengeluaran ini?'),
-                              //           actions: <Widget>[
-                              //             TextButton(
-                              //               child: const Text(
-                              //                 'Batal',
-                              //                 style:
-                              //                     TextStyle(color: Colors.red),
-                              //               ),
-                              //               onPressed: () {
-                              //                 Navigator.of(context).pop();
-                              //               },
-                              //             ),
-                              //             TextButton(
-                              //               child: const Text(
-                              //                 'Hapus',
-                              //                 style:
-                              //                     TextStyle(color: Colors.blue),
-                              //               ),
-                              //               onPressed: () {
-                              //                 penc.removePendapatan(data[index]
-                              //                         ['pendapatanID']
-                              //                     .toString());
-                              //                 setState(() {
-                              //                   penc.getPendapatan();
-                              //                 });
-                              //                 Navigator.of(context).pop();
-                              //               },
-                              //             ),
-                              //           ],
-                              //         );
-                              //       },
-                              //     );
-                              //   } else if (value == 'viewdetail') {
-                              //     Navigator.push(
-                              //       context,
-                              //       MaterialPageRoute(
-                              //         builder: (context) => DetailPendapatan(
-                              //           tglMasuk: pendapatan['tglMasuk'],
-                              //           tglKeluar: pendapatan['tglKeluar'],
-                              //           namaCust: pendapatan['namaCust'],
-                              //           telpCust: pendapatan['telpCust'],
-                              //           alamatCust: pendapatan['alamatCust'],
-                              //           sepatuCust: pendapatan['sepatuCust'],
-                              //           treatment: pendapatan['treatment'],
-                              //           hargaTreatment:
-                              //               pendapatan['hargaTreatment'],
-                              //         ),
-                              //       ),
-                              //     );
-                              //   }
-                              // },
+                              onSelected: (value) {
+                                if (value == 'edit') {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => UpdateHutang(
+                                        hutangId: data[index]['hutangId'],
+                                        namaPemberiPinjam: data[index]
+                                            ['namaPemberiPinjam'],
+                                        noteleponPemberiPinjam: data[index]
+                                            ['noteleponPemberiPinjam'],
+                                        nominalPinjam: data[index]
+                                            ['nominalPinjam'],
+                                        tanggalPinjam: data[index]
+                                            ['tanggalPinjam'],
+                                        tanggalJatuhTempo: data[index]
+                                            ['tanggalJatuhTempo'],
+                                        deskripsi: data[index]['deskripsi'],
+                                      ),
+                                    ),
+                                  ).then((value) {
+                                    if (value == true) {
+                                      setState(() {
+                                        hutangController.getHutang();
+                                      });
+                                    }
+                                  });
+                                } else if (value == 'delete') {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        backgroundColor: Colors.white,
+                                        title: const Text(
+                                            'Konfirmasi Penghapusan'),
+                                        content: const Text(
+                                            'Yakin ingin menghapus hutang ini?'),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            child: const Text(
+                                              'Batal',
+                                              style:
+                                                  TextStyle(color: Colors.red),
+                                            ),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                          TextButton(
+                                            child: const Text(
+                                              'Hapus',
+                                              style:
+                                                  TextStyle(color: Colors.blue),
+                                            ),
+                                            onPressed: () {
+                                              hutangController.removeHutang(
+                                                  data[index]['hutangId']
+                                                      .toString());
+                                              setState(() {
+                                                hutangController.getHutang();
+                                              });
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                } else if (value == 'viewdetail') {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => DetailHutang(
+                                        namaPemberiPinjam: data[index]
+                                            ['namaPemberiPinjam'],
+                                        noteleponPemberiPinjam: data[index]
+                                            ['noteleponPemberiPinjam'],
+                                        nominalPinjam: data[index]
+                                            ['nominalPinjam'],
+                                        tanggalPinjam: data[index]
+                                            ['tanggalPinjam'],
+                                        tanggalJatuhTempo: data[index]
+                                            ['tanggalJatuhTempo'],
+                                        deskripsi: data[index]['deskripsi'],
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
                               itemBuilder: (context) => [
                                 const PopupMenuItem(
                                   value: 'edit',
