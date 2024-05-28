@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:tugasakhir/model/hutangmodel.dart';
+import 'package:tugasakhir/controller/piutangcontroller.dart';
+import 'package:tugasakhir/model/piutangmodel.dart';
 
 class CreatePiutang extends StatefulWidget {
   const CreatePiutang({super.key});
@@ -14,6 +14,8 @@ class CreatePiutang extends StatefulWidget {
 
 class _CreatePiutangState extends State<CreatePiutang> {
   final _formKey = GlobalKey<FormState>();
+  final piutangController = PiutangController();
+
   String? namaPeminjam;
   String? noteleponPeminjam;
   String? nominalDipinjam;
@@ -345,14 +347,15 @@ class _CreatePiutangState extends State<CreatePiutang> {
                       ElevatedButton(
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            HutangModel hutangModel = HutangModel(
-                              namaPemberiPinjam: namaPeminjam!,
-                              noteleponPemberiPinjam: noteleponPeminjam!,
-                              nominalPinjam: nominalDipinjam!,
-                              tanggalPinjam: tanggalDipinjam!,
+                            PiutangModel piutangmodel = PiutangModel(
+                              namaPeminjam: namaPeminjam!,
+                              noteleponPeminjam: noteleponPeminjam!,
+                              nominalDiPinjam: nominalDipinjam!,
+                              tanggalDiPinjam: tanggalDipinjam!,
                               tanggalJatuhTempo: tanggalJatuhTempo!,
                               deskripsi: deskripsi!,
                             );
+                            piutangController.addPiutang(piutangmodel);
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                   content: Text('Form submitted successfully')),
