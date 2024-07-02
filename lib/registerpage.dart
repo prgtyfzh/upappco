@@ -39,25 +39,34 @@ class _RegisterPageState extends State<RegisterPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      margin: const EdgeInsets.only(
-                        right: 250,
-                      ),
-                      child: const Text(
-                        'Nama',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
+                      margin: const EdgeInsets.only(bottom: 20),
+                      child: Image.asset(
+                        'assets/image/logoupapp.png',
+                        height: 200,
                       ),
                     ),
+                    // Container(
+                    //   margin: const EdgeInsets.only(
+                    //     right: 250,
+                    //   ),
+                    //   child: const Text(
+                    //     'Nama',
+                    //     style: TextStyle(
+                    //       color: Colors.black,
+                    //       fontWeight: FontWeight.bold,
+                    //       fontSize: 16,
+                    //     ),
+                    //   ),
+                    // ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 50),
                       child: TextFormField(
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.account_box_rounded),
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          prefixIcon: const Icon(Icons.account_circle),
                           hintText: 'Masukkan nama',
-                          hintStyle: TextStyle(),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -75,27 +84,30 @@ class _RegisterPageState extends State<RegisterPage> {
                         },
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    Container(
-                      margin: const EdgeInsets.only(
-                        right: 250,
-                      ),
-                      child: const Text(
-                        'Email',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
+
+                    // Container(
+                    //   margin: const EdgeInsets.only(
+                    //     right: 250,
+                    //   ),
+                    //   child: const Text(
+                    //     'Email',
+                    //     style: TextStyle(
+                    //       color: Colors.black,
+                    //       fontWeight: FontWeight.bold,
+                    //       fontSize: 16,
+                    //     ),
+                    //   ),
+                    // ),
+                    const SizedBox(height: 20),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 50),
                       child: TextFormField(
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.email),
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          prefixIcon: const Icon(Icons.email),
                           hintText: 'Masukkan email',
-                          hintStyle: TextStyle(),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -112,29 +124,33 @@ class _RegisterPageState extends State<RegisterPage> {
                         },
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    Container(
-                      margin: const EdgeInsets.only(
-                        right: 210,
-                      ),
-                      child: const Text(
-                        'Kata Sandi',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
+
+                    // Container(
+                    //   margin: const EdgeInsets.only(
+                    //     right: 210,
+                    //   ),
+                    //   child: const Text(
+                    //     'Kata Sandi',
+                    //     style: TextStyle(
+                    //       color: Colors.black,
+                    //       fontWeight: FontWeight.bold,
+                    //       fontSize: 16,
+                    //     ),
+                    //   ),
+                    // ),
+
+                    const SizedBox(height: 20),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 50),
                       child: TextFormField(
                         controller: _passwordController,
                         obscureText: !isPasswordVisible,
                         decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
                           prefixIcon: const Icon(Icons.lock),
                           hintText: 'Masukkan kata sandi',
-                          hintStyle: const TextStyle(),
                           suffixIcon: IconButton(
                             icon: Icon(
                               isPasswordVisible
@@ -163,28 +179,30 @@ class _RegisterPageState extends State<RegisterPage> {
                         },
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    Container(
-                      margin: const EdgeInsets.only(
-                        right: 125,
-                      ),
-                      child: const Text(
-                        'Konfirmasi Kata Sandi',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
+                    const SizedBox(height: 20),
+                    // Container(
+                    //   margin: const EdgeInsets.only(
+                    //     right: 125,
+                    //   ),
+                    //   child: const Text(
+                    //     'Konfirmasi Kata Sandi',
+                    //     style: TextStyle(
+                    //       color: Colors.black,
+                    //       fontWeight: FontWeight.bold,
+                    //       fontSize: 16,
+                    //     ),
+                    //   ),
+                    // ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 50),
                       child: TextFormField(
                         obscureText: !isConfirmPasswordVisible,
                         decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
                           prefixIcon: const Icon(Icons.lock),
-                          hintText: 'Masukkan kata sandi',
-                          hintStyle: const TextStyle(),
+                          hintText: 'Masukkan konfirmasi kata sandi',
                           suffixIcon: IconButton(
                             icon: Icon(
                               isConfirmPasswordVisible
@@ -215,7 +233,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         },
                       ),
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 35),
                     ElevatedButton(
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
@@ -323,7 +341,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             'Masuk',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Colors.red,
+                              color: Color(0xFFB18154),
                             ),
                           ),
                         ),

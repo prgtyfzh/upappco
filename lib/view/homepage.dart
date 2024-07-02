@@ -1,7 +1,9 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tugasakhir/controller/hutangcontroller.dart';
+import 'package:tugasakhir/controller/piutangcontroller.dart';
 import 'package:tugasakhir/loginpage.dart';
 import 'package:tugasakhir/view/hutang.dart';
 import 'package:tugasakhir/view/piutang.dart';
@@ -17,12 +19,17 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String userName = 'Loading...';
   String totalSisaHutang = 'Loading...';
+  String totalSisaPiutang = 'Loading...';
+  int _currentIndex = 0;
+  List<String> _categories = ['Hutang', 'Piutang'];
+  List<String> _amounts = ['Loading...', 'Loading...'];
 
   @override
   void initState() {
     super.initState();
     fetchUserName();
     fetchTotalSisaHutang();
+    fetchTotalSisaPiutang();
   }
 
   Future<void> fetchUserName() async {
@@ -43,6 +50,16 @@ class _HomePageState extends State<HomePage> {
     String total = await hutangController.getTotalSisaHutang();
     setState(() {
       totalSisaHutang = total;
+      _amounts[0] = 'Rp$totalSisaHutang'; // Update Hutang amount
+    });
+  }
+
+  Future<void> fetchTotalSisaPiutang() async {
+    final piutangController = PiutangController();
+    String total = await piutangController.getTotalSisaPiutang();
+    setState(() {
+      totalSisaPiutang = total;
+      _amounts[1] = 'Rp$totalSisaPiutang'; // Update Piutang amount
     });
   }
 
@@ -76,9 +93,9 @@ class _HomePageState extends State<HomePage> {
           Container(
             width: 370,
             height: 300,
-            decoration: BoxDecoration(
-              color: const Color(0xFF24675B), // Set background color to green
-              borderRadius: const BorderRadius.only(
+            decoration: const BoxDecoration(
+              color: Color(0xFF24675B), // Set background color to green
+              borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(10.0),
                 topRight: Radius.circular(10.0),
                 bottomLeft: Radius.circular(50.0),
@@ -86,69 +103,120 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(8.0), // Add some padding inside
+              padding: const EdgeInsets.only(
+                  top: 0,
+                  bottom: 10,
+                  left: 20,
+                  right: 20), // Add some padding inside
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.only(
-                        right: 200), // Add some padding inside
-                    child: const Text(
-                      'Debt Wallet',
-                      style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Container(
+                      margin: const EdgeInsets.only(left: 0, top: 0),
+                      child: Image.asset(
+                        'assets/image/logoupapp.png',
+                        height: 90,
+                      ),
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    width: 300,
-                    height: 150,
-                    margin:
-                        const EdgeInsets.only(bottom: 0), // Remove any margin
-                    decoration: BoxDecoration(
-                      color: const Color(
-                          0xFFB18154), // Set background color to white
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(10.0),
-                        topRight: Radius.circular(10.0),
-                        bottomLeft: Radius.circular(5.0),
-                        bottomRight: Radius.circular(5.0),
-                      ), // Add rounded corners
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Hutang',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            Text(
-                              totalSisaHutang,
-                              style: const TextStyle(
-                                fontSize: 35,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+                  const SizedBox(height: 20),
+                  _buildCarousel(),
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCarousel() {
+    return Column(
+      children: [
+        CarouselSlider.builder(
+          itemCount: 2, // Tetap dua item: Hutang dan Piutang
+          options: CarouselOptions(
+            height: 150.0,
+            enableInfiniteScroll: true, // Mengaktifkan guliran tak terbatas
+            autoPlay: false, // Auto play agar terus bergerak
+            viewportFraction: 1.0,
+            onPageChanged: (index, reason) {
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+          ),
+          itemBuilder: (context, index, realIndex) {
+            return _buildHutangPiutangCard(
+              title: _categories[index],
+              amount: _amounts[index],
+            );
+          },
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            _categories.length,
+            (index) => Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: _currentIndex == index ? Colors.white : Colors.grey,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Widget untuk menampilkan kartu Hutang atau Piutang
+  Widget _buildHutangPiutangCard(
+      {required String title, required String amount}) {
+    return Container(
+      margin: const EdgeInsets.all(5.0),
+      padding: const EdgeInsets.all(10.0),
+      width: 330,
+      height: 150,
+      decoration: const BoxDecoration(
+        color: Color(0xFFB18154), // Set background color to white
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20.0),
+          topRight: Radius.circular(20.0),
+          bottomLeft: Radius.circular(20.0),
+          bottomRight: Radius.circular(20.0),
+        ), // Add rounded corners
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                amount,
+                style: const TextStyle(
+                  fontSize: 35,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -229,7 +297,7 @@ class _HomePageState extends State<HomePage> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => LoginPage()),
+                    MaterialPageRoute(builder: (context) => const LoginPage()),
                   );
                 },
               ),

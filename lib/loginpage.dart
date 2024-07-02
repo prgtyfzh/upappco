@@ -33,22 +33,32 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    margin: const EdgeInsets.only(
-                      right: 250,
-                    ),
-                    child: const Text(
-                      'Email',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+                    margin: const EdgeInsets.only(bottom: 20),
+                    child: Image.asset(
+                      'assets/image/logoupapp.png',
+                      height: 200,
                     ),
                   ),
+                  // Container(
+                  //   margin: const EdgeInsets.only(
+                  //     right: 250,
+                  //   ),
+                  //   child: const Text(
+                  //     'Email',
+                  //     style: TextStyle(
+                  //       color: Colors.black,
+                  //       fontWeight: FontWeight.bold,
+                  //       fontSize: 16,
+                  //     ),
+                  //   ),
+                  // ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 50),
                     child: TextFormField(
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
                         prefixIcon: Icon(Icons.email),
                         hintText: 'Masukkan email',
                         hintStyle: TextStyle(),
@@ -68,25 +78,28 @@ class _LoginPageState extends State<LoginPage> {
                       },
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Container(
-                    margin: const EdgeInsets.only(
-                      right: 210,
-                    ),
-                    child: const Text(
-                      'Kata Sandi',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
+                  const SizedBox(height: 20),
+                  // Container(
+                  //   margin: const EdgeInsets.only(
+                  //     right: 210,
+                  //   ),
+                  //   child: const Text(
+                  //     'Kata Sandi',
+                  //     style: TextStyle(
+                  //       color: Colors.black,
+                  //       fontWeight: FontWeight.bold,
+                  //       fontSize: 16,
+                  //     ),
+                  //   ),
+                  // ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 50),
                     child: TextFormField(
                       obscureText: !isPasswordVisible,
                       decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
                         prefixIcon: const Icon(Icons.lock),
                         hintText: 'Masukkan kata sandi',
                         hintStyle: const TextStyle(),
@@ -116,7 +129,7 @@ class _LoginPageState extends State<LoginPage> {
                       },
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 35),
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
@@ -156,21 +169,12 @@ class _LoginPageState extends State<LoginPage> {
                         }
                       }
                     },
-                    style: ButtonStyle(
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18))),
-                      minimumSize:
-                          MaterialStateProperty.all<Size>(const Size(280, 50)),
-                      backgroundColor:
-                          MaterialStateProperty.all(const Color(0xff329f5b)),
-                      overlayColor: MaterialStateProperty.resolveWith<Color?>(
-                          (Set<MaterialState> states) {
-                        if (states.contains(MaterialState.pressed)) {
-                          return const Color(0xFF24675B);
-                        }
-                        return null;
-                      }),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF24675B),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      minimumSize: const Size(280, 50),
                     ),
                     child: const Text(
                       'Masuk',
@@ -197,7 +201,7 @@ class _LoginPageState extends State<LoginPage> {
                           'Daftar',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Colors.red,
+                            color: Color(0xFFB18154),
                           ),
                         ),
                       ),

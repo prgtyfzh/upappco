@@ -12,17 +12,18 @@ dependencies:
   flutter:
     sdk: flutter
 
-  firebase_auth: ^4.6.3
-  firebase_core: ^2.31.1
-  cloud_firestore: ^4.7.1
+  firebase_auth: ^5.1.1
+  firebase_core: ^3.1.1
+  cloud_firestore: ^5.0.2
   cupertino_icons: ^1.0.6
   google_fonts: ^6.2.1
   image_picker: ^1.1.1
-  firebase_analytics: ^10.10.6
+  firebase_analytics: ^11.1.0
   intl: ^0.19.0
   qr_flutter: ^4.1.0
   qr_code_scanner: ^1.0.1
   permission_handler: ^11.3.1
+  carousel_slider: ^4.2.1
 
 dev_dependencies:
   flutter_test:
@@ -32,3 +33,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/image/logoupapp.png
+    - assets/image/logoupapp2.png
