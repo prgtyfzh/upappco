@@ -167,8 +167,7 @@ class _LoginPageState extends State<LoginPage> {
                       overlayColor: MaterialStateProperty.resolveWith<Color?>(
                           (Set<MaterialState> states) {
                         if (states.contains(MaterialState.pressed)) {
-                          return const Color(
-                              0xFF4CAF50); // Ganti dengan warna overlay saat tombol ditekan
+                          return const Color(0xFF24675B);
                         }
                         return null;
                       }),
@@ -184,7 +183,7 @@ class _LoginPageState extends State<LoginPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text("Don't have an account?"),
+                      const Text("Tidak punya akun?"),
                       TextButton(
                         onPressed: () {
                           Navigator.push(
@@ -195,7 +194,7 @@ class _LoginPageState extends State<LoginPage> {
                           );
                         },
                         child: const Text(
-                          'Sign Up',
+                          'Daftar',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.red,

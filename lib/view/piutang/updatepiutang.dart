@@ -4,42 +4,121 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:tugasakhir/controller/piutangcontroller.dart';
 import 'package:tugasakhir/model/piutangmodel.dart';
+import 'package:tugasakhir/view/piutang.dart';
 
-class CreatePiutang extends StatefulWidget {
-  const CreatePiutang({super.key});
+class UpdatePiutang extends StatefulWidget {
+  const UpdatePiutang(
+      {Key? key,
+      this.piutangId,
+      this.namaPeminjam,
+      this.noteleponPeminjam,
+      this.nominalDiPinjam,
+      this.tanggalDiPinjam,
+      this.tanggalJatuhTempo,
+      this.deskripsi})
+      : super(key: key);
+
+  final String? piutangId;
+  final String? namaPeminjam;
+  final String? noteleponPeminjam;
+  final String? nominalDiPinjam;
+  final String? tanggalDiPinjam;
+  final String? tanggalJatuhTempo;
+  final String? deskripsi;
 
   @override
-  State<CreatePiutang> createState() => _CreatePiutangState();
+  State<UpdatePiutang> createState() => _UpdatePiutangState();
 }
 
-class _CreatePiutangState extends State<CreatePiutang> {
+class _UpdatePiutangState extends State<UpdatePiutang> {
+  var piutangController = PiutangController();
+
   final _formKey = GlobalKey<FormState>();
-  final piutangController = PiutangController();
 
-  String? namaPeminjam;
-  String? noteleponPeminjam;
-  String? nominalDiPinjam;
-  String? tanggalDiPinjam;
-  String? tanggalJatuhTempo;
-  String? deskripsi;
+  String? newNamaPeminjam;
+  String? newNoTeleponPeminjam;
+  String? newNominalDiPinjam;
+  String? newTanggalDiPinjam;
+  String? newTanggalJatuhTempo;
+  String? newDeskripsi;
 
-  TextEditingController nominalController = TextEditingController();
   final TextEditingController _tanggalDiPinjamController =
       TextEditingController();
   final TextEditingController _tanggalJatuhTempoController =
       TextEditingController();
+  final TextEditingController _nominalController = TextEditingController();
 
-  // final _picker = ImagePicker();
+  Future<void> _showConfirmationDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Konfirmasi'),
+          content: const SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Yakin ingin mengubah piutang?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Batal'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Ubah'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _updatePiutang();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-  // Future<void> _pickImage() async {
-  //   final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+  void _updatePiutang() {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      PiutangModel piutangmodel = PiutangModel(
+        piutangId: widget.piutangId,
+        namaPeminjam: newNamaPeminjam!.toString(),
+        noteleponPeminjam: newNoTeleponPeminjam!.toString(),
+        nominalDiPinjam: newNominalDiPinjam!.toString(),
+        tanggalDiPinjam: newTanggalDiPinjam!.toString(),
+        tanggalJatuhTempo: newTanggalJatuhTempo!.toString(),
+        deskripsi: newDeskripsi!.toString(),
+      );
+      piutangController.updatePiutang(piutangmodel);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Hutang Berubah'),
+        ),
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const Piutang(),
+        ),
+      );
+    }
+  }
 
-  //   if (pickedFile != null) {
-  //     setState(() {
-  //       _selectedFile = File(pickedFile.path);
-  //     });
-  //   }
-  // }
+  @override
+  void initState() {
+    super.initState();
+    _tanggalDiPinjamController.text = widget.tanggalDiPinjam ?? '';
+    _tanggalJatuhTempoController.text = widget.tanggalJatuhTempo ?? '';
+    _nominalController.text = widget.nominalDiPinjam ?? '';
+    newTanggalDiPinjam = widget.tanggalDiPinjam;
+    newTanggalJatuhTempo = widget.tanggalJatuhTempo;
+    newNominalDiPinjam = widget.nominalDiPinjam;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +126,7 @@ class _CreatePiutangState extends State<CreatePiutang> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          'Tambahkan Piutang',
+          'Edit Piutang',
           style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
           ),
@@ -92,7 +171,6 @@ class _CreatePiutangState extends State<CreatePiutang> {
                         width: 300,
                         child: TextFormField(
                           decoration: InputDecoration(
-                            hintText: 'Masukkan nama peminjam',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.0),
                             ),
@@ -110,11 +188,10 @@ class _CreatePiutangState extends State<CreatePiutang> {
                             }
                             return null;
                           },
-                          onChanged: (value) {
-                            setState(() {
-                              namaPeminjam = value;
-                            });
+                          onSaved: (value) {
+                            newNamaPeminjam = value;
                           },
+                          initialValue: widget.namaPeminjam,
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -140,7 +217,6 @@ class _CreatePiutangState extends State<CreatePiutang> {
                         width: 300,
                         child: TextFormField(
                           decoration: InputDecoration(
-                            hintText: 'Masukkan nomor telepon',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.0),
                             ),
@@ -163,11 +239,10 @@ class _CreatePiutangState extends State<CreatePiutang> {
                             }
                             return null;
                           },
-                          onChanged: (value) {
-                            setState(() {
-                              noteleponPeminjam = value;
-                            });
+                          onSaved: (value) {
+                            newNoTeleponPeminjam = value;
                           },
+                          initialValue: widget.noteleponPeminjam,
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -192,9 +267,8 @@ class _CreatePiutangState extends State<CreatePiutang> {
                       Container(
                         width: 300,
                         child: TextFormField(
-                          controller: nominalController,
+                          controller: _nominalController,
                           decoration: InputDecoration(
-                            hintText: 'Masukkan nominal dipinjam',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.0),
                             ),
@@ -225,18 +299,18 @@ class _CreatePiutangState extends State<CreatePiutang> {
                                   numberFormat.format(int.parse(newValue));
 
                               setState(() {
-                                nominalDiPinjam = formattedNominal;
+                                newNominalDiPinjam = formattedNominal;
                               });
 
-                              nominalController.value =
-                                  nominalController.value.copyWith(
+                              _nominalController.value =
+                                  _nominalController.value.copyWith(
                                 text: formattedNominal,
                                 selection: TextSelection.collapsed(
                                     offset: formattedNominal.length),
                               );
                             } else {
                               setState(() {
-                                nominalDiPinjam = null;
+                                newNominalDiPinjam = null;
                               });
                             }
                           },
@@ -251,7 +325,7 @@ class _CreatePiutangState extends State<CreatePiutang> {
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            'Tanggal Dipinjam',
+                            'Tanggal Di Pinjam',
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -266,34 +340,37 @@ class _CreatePiutangState extends State<CreatePiutang> {
                         child: TextFormField(
                           controller: _tanggalDiPinjamController,
                           decoration: InputDecoration(
-                            hintText: 'Pilih tanggal di pinjam',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.0),
                             ),
                             filled: true,
-                            fillColor: const Color.fromRGBO(255, 255, 255, 1),
+                            fillColor: Colors.white,
                             suffixIcon: IconButton(
                               icon: const Icon(Icons.calendar_today),
                               onPressed: () async {
                                 DateTime? tanggaldp = await showDatePicker(
                                   context: context,
                                   initialDate: DateTime.now(),
-                                  firstDate: DateTime(2024),
+                                  firstDate: DateTime(2043),
                                   lastDate: DateTime(2030),
                                 );
 
                                 if (tanggaldp != null) {
-                                  tanggalDiPinjam = DateFormat('dd-MM-yyyy')
-                                      .format(tanggaldp);
+                                  newTanggalDiPinjam = DateFormat('dd-MM-yyyy')
+                                      .format(tanggaldp)
+                                      .toString();
 
                                   setState(() {
                                     _tanggalDiPinjamController.text =
-                                        tanggalDiPinjam.toString();
+                                        newTanggalDiPinjam!;
                                   });
                                 }
                               },
                             ),
                           ),
+                          onSaved: (value) {
+                            newTanggalDiPinjam = value;
+                          },
                           readOnly: true,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -327,12 +404,11 @@ class _CreatePiutangState extends State<CreatePiutang> {
                         child: TextFormField(
                           controller: _tanggalJatuhTempoController,
                           decoration: InputDecoration(
-                            hintText: 'Pilih tanggal jatuh tempo',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.0),
                             ),
                             filled: true,
-                            fillColor: const Color.fromRGBO(255, 255, 255, 1),
+                            fillColor: Colors.white,
                             suffixIcon: IconButton(
                               icon: const Icon(Icons.calendar_today),
                               onPressed: () async {
@@ -344,17 +420,22 @@ class _CreatePiutangState extends State<CreatePiutang> {
                                 );
 
                                 if (tanggaljt != null) {
-                                  tanggalJatuhTempo = DateFormat('dd-MM-yyyy')
-                                      .format(tanggaljt);
+                                  newTanggalJatuhTempo =
+                                      DateFormat('dd-MM-yyyy')
+                                          .format(tanggaljt)
+                                          .toString();
 
                                   setState(() {
                                     _tanggalJatuhTempoController.text =
-                                        tanggalJatuhTempo.toString();
+                                        newTanggalJatuhTempo!;
                                   });
                                 }
                               },
                             ),
                           ),
+                          onSaved: (value) {
+                            newTanggalJatuhTempo = value;
+                          },
                           readOnly: true,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -387,7 +468,6 @@ class _CreatePiutangState extends State<CreatePiutang> {
                         width: 300,
                         child: TextFormField(
                           decoration: InputDecoration(
-                            hintText: 'Masukkan deskripsi',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.0),
                             ),
@@ -402,29 +482,47 @@ class _CreatePiutangState extends State<CreatePiutang> {
                             }
                             return null;
                           },
-                          onChanged: (value) {
-                            setState(() {
-                              deskripsi = value;
-                            });
+                          onSaved: (value) {
+                            newDeskripsi = value;
                           },
+                          initialValue: widget.deskripsi,
                         ),
                       ),
                       const SizedBox(height: 20),
+                      // ElevatedButton.icon(
+                      //   onPressed: _pickImage,
+                      //   icon: const Icon(Icons.upload_file),
+                      //   label: const Text('Upload Gambar'),
+                      // ),
+                      // if (_selectedFile != null)
+                      //   Padding(
+                      //     padding: const EdgeInsets.all(8.0),
+                      //     child: Image.file(
+                      //       _selectedFile!,
+                      //       height: 100,
+                      //       width: 100,
+                      //     ),
+                      //   ),
+                      const SizedBox(height: 40),
                       ElevatedButton(
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
+                            _formKey.currentState!.save();
                             PiutangModel piutangmodel = PiutangModel(
-                              namaPeminjam: namaPeminjam!,
-                              noteleponPeminjam: noteleponPeminjam!,
-                              nominalDiPinjam: nominalDiPinjam!,
-                              tanggalDiPinjam: tanggalDiPinjam!,
-                              tanggalJatuhTempo: tanggalJatuhTempo!,
-                              deskripsi: deskripsi!,
+                              piutangId: widget.piutangId,
+                              namaPeminjam: newNamaPeminjam!.toString(),
+                              noteleponPeminjam:
+                                  newNoTeleponPeminjam!.toString(),
+                              nominalDiPinjam: newNominalDiPinjam!.toString(),
+                              tanggalDiPinjam: newTanggalDiPinjam!.toString(),
+                              tanggalJatuhTempo:
+                                  newTanggalJatuhTempo!.toString(),
+                              deskripsi: newDeskripsi!.toString(),
                             );
-                            piutangController.addPiutang(piutangmodel);
+                            piutangController.updatePiutang(piutangmodel);
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                  content: Text('Data berhasil ditambahkan')),
+                                  content: Text('Data berhasil diubah')),
                             );
                             Navigator.pop(context, true);
                           }

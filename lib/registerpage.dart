@@ -43,7 +43,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         right: 250,
                       ),
                       child: const Text(
-                        'Name',
+                        'Nama',
                         style: TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
@@ -55,12 +55,16 @@ class _RegisterPageState extends State<RegisterPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 50),
                       child: TextFormField(
                         decoration: const InputDecoration(
-                          hintText: 'Name',
-                          hintStyle: TextStyle(fontStyle: FontStyle.italic),
+                          prefixIcon: Icon(Icons.account_box_rounded),
+                          hintText: 'Masukkan nama',
+                          hintStyle: TextStyle(),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter your name';
+                            return 'Nama tidak boleh kosong';
+                          }
+                          if (value.length > 30) {
+                            return 'Nama tidak boleh lebih dari 30 karakter';
                           }
                           return null;
                         },
@@ -89,14 +93,15 @@ class _RegisterPageState extends State<RegisterPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 50),
                       child: TextFormField(
                         decoration: const InputDecoration(
-                          hintText: 'Email',
-                          hintStyle: TextStyle(fontStyle: FontStyle.italic),
+                          prefixIcon: Icon(Icons.email),
+                          hintText: 'Masukkan email',
+                          hintStyle: TextStyle(),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter your email';
+                            return 'Email tidak boleh kosong';
                           } else if (!value.contains('@')) {
-                            return 'Please enter a valid email';
+                            return 'Masukkan email yang benar';
                           }
                           return null;
                         },
@@ -110,10 +115,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     const SizedBox(height: 10),
                     Container(
                       margin: const EdgeInsets.only(
-                        right: 220,
+                        right: 210,
                       ),
                       child: const Text(
-                        'Password',
+                        'Kata Sandi',
                         style: TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
@@ -127,9 +132,9 @@ class _RegisterPageState extends State<RegisterPage> {
                         controller: _passwordController,
                         obscureText: !isPasswordVisible,
                         decoration: InputDecoration(
-                          hintText: 'Password',
-                          hintStyle:
-                              const TextStyle(fontStyle: FontStyle.italic),
+                          prefixIcon: const Icon(Icons.lock),
+                          hintText: 'Masukkan kata sandi',
+                          hintStyle: const TextStyle(),
                           suffixIcon: IconButton(
                             icon: Icon(
                               isPasswordVisible
@@ -145,9 +150,9 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter your password';
+                            return 'Kata sandi tidak boleh kosong';
                           } else if (value.length < 6) {
-                            return 'Password must be at least 6 characters';
+                            return 'Kata sandi harus berisi minimal 6 karakter';
                           }
                           return null;
                         },
@@ -161,10 +166,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     const SizedBox(height: 10),
                     Container(
                       margin: const EdgeInsets.only(
-                        right: 155,
+                        right: 125,
                       ),
                       child: const Text(
-                        'Confirm Password',
+                        'Konfirmasi Kata Sandi',
                         style: TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
@@ -177,9 +182,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: TextFormField(
                         obscureText: !isConfirmPasswordVisible,
                         decoration: InputDecoration(
-                          hintText: 'Confirm Password',
-                          hintStyle:
-                              const TextStyle(fontStyle: FontStyle.italic),
+                          prefixIcon: const Icon(Icons.lock),
+                          hintText: 'Masukkan kata sandi',
+                          hintStyle: const TextStyle(),
                           suffixIcon: IconButton(
                             icon: Icon(
                               isConfirmPasswordVisible
@@ -196,10 +201,10 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter your password';
+                            return 'Kata sandi tidak boleh kosong';
                           }
                           if (value != _passwordController.text) {
-                            return 'Password must be the same';
+                            return 'Kata sandi harus sama';
                           }
                           return null;
                         },
@@ -287,14 +292,14 @@ class _RegisterPageState extends State<RegisterPage> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF454BE0),
+                        backgroundColor: const Color(0xFF24675B),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18),
                         ),
                         minimumSize: const Size(280, 50),
                       ),
                       child: const Text(
-                        'Register',
+                        'Daftar',
                         style: TextStyle(
                           fontSize: 18,
                           color: Colors.white,
@@ -304,7 +309,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text("Already have an account?"),
+                        const Text("Sudah punya akun?"),
                         TextButton(
                           onPressed: () {
                             Navigator.push(
@@ -315,7 +320,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             );
                           },
                           child: const Text(
-                            'Sign In',
+                            'Masuk',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.red,

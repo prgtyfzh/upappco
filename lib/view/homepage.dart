@@ -1,17 +1,51 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:tugasakhir/controller/hutangcontroller.dart';
+import 'package:tugasakhir/loginpage.dart';
 import 'package:tugasakhir/view/hutang.dart';
 import 'package:tugasakhir/view/piutang.dart';
 import 'package:tugasakhir/view/riwayat.dart';
-import 'package:tugasakhir/view/settings.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  String userName = 'Loading...';
+  String totalSisaHutang = 'Loading...';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserName();
+    fetchTotalSisaHutang();
+  }
+
+  Future<void> fetchUserName() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      setState(() {
+        userName = userDoc['uName'] ?? 'User';
+      });
+    }
+  }
+
+  Future<void> fetchTotalSisaHutang() async {
+    final hutangController = HutangController();
+    String total = await hutangController.getTotalSisaHutang();
+    setState(() {
+      totalSisaHutang = total;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,9 +76,9 @@ class _HomePageState extends State<HomePage> {
           Container(
             width: 370,
             height: 300,
-            decoration: const BoxDecoration(
-              color: Color(0xFF24675B), // Set background color to green
-              borderRadius: BorderRadius.only(
+            decoration: BoxDecoration(
+              color: const Color(0xFF24675B), // Set background color to green
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(10.0),
                 topRight: Radius.circular(10.0),
                 bottomLeft: Radius.circular(50.0),
@@ -74,22 +108,23 @@ class _HomePageState extends State<HomePage> {
                     height: 150,
                     margin:
                         const EdgeInsets.only(bottom: 0), // Remove any margin
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFB18154), // Set background color to white
-                      borderRadius: BorderRadius.only(
+                    decoration: BoxDecoration(
+                      color: const Color(
+                          0xFFB18154), // Set background color to white
+                      borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(10.0),
                         topRight: Radius.circular(10.0),
                         bottomLeft: Radius.circular(5.0),
                         bottomRight: Radius.circular(5.0),
                       ), // Add rounded corners
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               'Hutang',
                               style: TextStyle(
                                 fontSize: 20,
@@ -97,10 +132,10 @@ class _HomePageState extends State<HomePage> {
                                 color: Colors.white,
                               ),
                             ),
-                            SizedBox(height: 20),
+                            const SizedBox(height: 20),
                             Text(
-                              'Rp100.000,00',
-                              style: TextStyle(
+                              totalSisaHutang,
+                              style: const TextStyle(
                                 fontSize: 35,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
@@ -126,9 +161,25 @@ class _HomePageState extends State<HomePage> {
       padding: const EdgeInsets.all(20.0),
       child: Column(
         children: <Widget>[
-          const Text(
-            'Selamat datang, Asahi!',
-            style: TextStyle(fontSize: 18),
+          RichText(
+            text: TextSpan(
+              text: 'Selamat datang, ',
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+              children: <TextSpan>[
+                TextSpan(
+                  text: userName,
+                  style: const TextStyle(
+                    color: Color(0xFFB18154),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 20),
           Row(
@@ -178,7 +229,7 @@ class _HomePageState extends State<HomePage> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const Settings()),
+                    MaterialPageRoute(builder: (context) => LoginPage()),
                   );
                 },
               ),

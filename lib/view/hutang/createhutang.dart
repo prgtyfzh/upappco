@@ -1,8 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:tugasakhir/controller/hutangcontroller.dart';
 import 'package:tugasakhir/model/hutangmodel.dart';
 
@@ -24,6 +23,13 @@ class _CreateHutangState extends State<CreateHutang> {
   String? tanggalJatuhTempo;
   String? deskripsi;
   String? gambar;
+
+  TextEditingController nominalController = TextEditingController();
+  final TextEditingController _tanggalPinjamController =
+      TextEditingController();
+  final TextEditingController _tanggalJatuhTempoController =
+      TextEditingController();
+
   // File? _selectedFile;
 
   // final _picker = ImagePicker();
@@ -39,16 +45,20 @@ class _CreateHutangState extends State<CreateHutang> {
   // }
 
   @override
+  void dispose() {
+    nominalController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: const Color(0xFF24675B),
         title: Text(
           'Tambahkan Hutang',
           style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
           ),
         ),
       ),
@@ -146,6 +156,12 @@ class _CreateHutangState extends State<CreateHutang> {
                             filled: true,
                             fillColor: Colors.white,
                           ),
+                          keyboardType: TextInputType
+                              .number, // Set the keyboard type to number
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter
+                                .digitsOnly // Allow only digits
+                          ],
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Nomor telepon tidak boleh kosong!';
@@ -185,6 +201,8 @@ class _CreateHutangState extends State<CreateHutang> {
                       Container(
                         width: 300,
                         child: TextFormField(
+                          controller:
+                              nominalController, // Gunakan TextEditingController
                           decoration: InputDecoration(
                             hintText: 'Masukkan nominal pinjaman',
                             border: OutlineInputBorder(
@@ -193,18 +211,44 @@ class _CreateHutangState extends State<CreateHutang> {
                             filled: true,
                             fillColor: Colors.white,
                           ),
+                          keyboardType: TextInputType
+                              .number, // Set the keyboard type to number
+                          inputFormatters: [
+                            FilteringTextInputFormatter
+                                .digitsOnly // Allow only digits
+                          ],
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Nominal Pinjaman tidak boleh kosong!';
-                            } else if (!RegExp(r'^\d+$').hasMatch(value)) {
-                              return 'Nominal Pinjaman harus berupa angka!';
+                              return 'Nominal tidak boleh kosong!';
+                            } else if (!RegExp(r'^\d{1,3}(.\d{3})*(\.\d+)?$')
+                                .hasMatch(value)) {
+                              return 'Nominal harus berisi angka saja.';
                             }
                             return null;
                           },
                           onChanged: (value) {
-                            setState(() {
-                              nominalPinjam = value;
-                            });
+                            final numberFormat = NumberFormat("#,##0", "id_ID");
+                            final newValue = value.replaceAll(",", "");
+
+                            if (newValue.isNotEmpty) {
+                              final formattedNominal =
+                                  numberFormat.format(int.parse(newValue));
+
+                              setState(() {
+                                nominalPinjam = formattedNominal;
+                              });
+
+                              nominalController.value =
+                                  nominalController.value.copyWith(
+                                text: formattedNominal,
+                                selection: TextSelection.collapsed(
+                                    offset: formattedNominal.length),
+                              );
+                            } else {
+                              setState(() {
+                                nominalPinjam = null;
+                              });
+                            }
                           },
                         ),
                       ),
@@ -230,27 +274,42 @@ class _CreateHutangState extends State<CreateHutang> {
                       Container(
                         width: 300,
                         child: TextFormField(
+                          controller: _tanggalPinjamController,
                           decoration: InputDecoration(
-                            hintText: 'Masukkan tanggal pinjaman',
+                            hintText: 'Pilih tanggal pinjam',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.0),
                             ),
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: const Color.fromRGBO(255, 255, 255, 1),
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.calendar_today),
+                              onPressed: () async {
+                                DateTime? tanggalp = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(2024),
+                                  lastDate: DateTime(2030),
+                                );
+
+                                if (tanggalp != null) {
+                                  tanggalPinjam =
+                                      DateFormat('dd-MM-yyyy').format(tanggalp);
+
+                                  setState(() {
+                                    _tanggalPinjamController.text =
+                                        tanggalPinjam.toString();
+                                  });
+                                }
+                              },
+                            ),
                           ),
+                          readOnly: true,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Tanggal Pinjaman tidak boleh kosong!';
-                            } else if (!RegExp(r'^\d{4}-\d{2}-\d{2}$')
-                                .hasMatch(value)) {
-                              return 'Tanggal Pinjaman harus berformat yyyy-mm-dd!';
+                              return 'Tanggal tidak boleh kosong!';
                             }
                             return null;
-                          },
-                          onChanged: (value) {
-                            setState(() {
-                              tanggalPinjam = value;
-                            });
                           },
                         ),
                       ),
@@ -276,27 +335,42 @@ class _CreateHutangState extends State<CreateHutang> {
                       Container(
                         width: 300,
                         child: TextFormField(
+                          controller: _tanggalJatuhTempoController,
                           decoration: InputDecoration(
-                            hintText: 'Masukkan tanggal jatuh tempo',
+                            hintText: 'Pilih tanggal jatuh tempo',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.0),
                             ),
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: const Color.fromRGBO(255, 255, 255, 1),
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.calendar_today),
+                              onPressed: () async {
+                                DateTime? tanggaljt = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(2024),
+                                  lastDate: DateTime(2030),
+                                );
+
+                                if (tanggaljt != null) {
+                                  tanggalJatuhTempo = DateFormat('dd-MM-yyyy')
+                                      .format(tanggaljt);
+
+                                  setState(() {
+                                    _tanggalJatuhTempoController.text =
+                                        tanggalJatuhTempo.toString();
+                                  });
+                                }
+                              },
+                            ),
                           ),
+                          readOnly: true,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Tanggal Jatuh Tempo tidak boleh kosong!';
-                            } else if (!RegExp(r'^\d{4}-\d{2}-\d{2}$')
-                                .hasMatch(value)) {
-                              return 'Tanggal Jatuh Tempo harus berformat yyyy-mm-dd!';
+                              return 'Tanggal tidak boleh kosong!';
                             }
                             return null;
-                          },
-                          onChanged: (value) {
-                            setState(() {
-                              tanggalJatuhTempo = value;
-                            });
                           },
                         ),
                       ),

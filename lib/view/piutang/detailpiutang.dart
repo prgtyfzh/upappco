@@ -1,36 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:tugasakhir/view/hutang/formbayar.dart';
-import 'package:tugasakhir/controller/hutangcontroller.dart';
+import 'package:tugasakhir/controller/piutangcontroller.dart';
 
-class DetailHutang extends StatefulWidget {
-  final String namaPemberiPinjam;
-  final String noteleponPemberiPinjam;
-  final String nominalPinjam;
-  final String tanggalPinjam;
+class DetailPiutang extends StatefulWidget {
+  final String namaPeminjam;
+  final String noteleponPeminjam;
+  final String nominalDiPinjam;
+  final String tanggalDiPinjam;
   final String tanggalJatuhTempo;
   final String deskripsi;
-  final String hutangId;
+  final String piutangId;
 
-  const DetailHutang({
+  const DetailPiutang({
     Key? key,
-    required this.namaPemberiPinjam,
-    required this.noteleponPemberiPinjam,
-    required this.nominalPinjam,
-    required this.tanggalPinjam,
+    required this.namaPeminjam,
+    required this.noteleponPeminjam,
+    required this.nominalDiPinjam,
+    required this.tanggalDiPinjam,
     required this.tanggalJatuhTempo,
     required this.deskripsi,
-    required this.hutangId,
+    required this.piutangId,
   }) : super(key: key);
 
   @override
-  _DetailHutangState createState() => _DetailHutangState();
+  _DetailPiutangState createState() => _DetailPiutangState();
 }
 
-class _DetailHutangState extends State<DetailHutang> {
-  final HutangController _hutangController = HutangController();
-  String _sisaHutang = '0';
+class _DetailPiutangState extends State<DetailPiutang> {
+  final PiutangController _piutangController = PiutangController();
+  String _sisaPiutang = '0';
   String _totalBayar = '0';
   double _progress = 0.0;
 
@@ -42,35 +41,35 @@ class _DetailHutangState extends State<DetailHutang> {
 
   Future<void> _loadData() async {
     await _loadTotalBayar();
-    await _loadSisaHutang();
+    await _loadSisaPiutang();
     _calculateProgress();
   }
 
-  Future<void> _loadSisaHutang() async {
-    String sisaHutang = await _hutangController.calculateTotalSisaHutang(
-      widget.hutangId,
-      widget.nominalPinjam,
+  Future<void> _loadSisaPiutang() async {
+    String sisaPiutang = await _piutangController.calculateTotalSisaPiutang(
+      widget.piutangId,
+      widget.nominalDiPinjam,
     );
     setState(() {
-      _sisaHutang = sisaHutang;
+      _sisaPiutang = sisaPiutang;
     });
   }
 
   Future<void> _loadTotalBayar() async {
     String totalBayar =
-        await _hutangController.getTotalNominalBayar(widget.hutangId);
+        await _piutangController.getTotalNominalBayar(widget.piutangId);
     setState(() {
       _totalBayar = totalBayar;
     });
   }
 
   void _calculateProgress() {
-    double nominalPinjam = double.parse(
-        widget.nominalPinjam.replaceAll('.', '').replaceAll(',', ''));
+    double nominalDiPinjam = double.parse(
+        widget.nominalDiPinjam.replaceAll('.', '').replaceAll(',', ''));
     double totalBayar =
         double.parse(_totalBayar.replaceAll('.', '').replaceAll(',', ''));
     setState(() {
-      _progress = totalBayar / nominalPinjam;
+      _progress = totalBayar / nominalDiPinjam;
       if (_progress > 1.0) {
         _progress = 1.0;
       }
@@ -79,7 +78,7 @@ class _DetailHutangState extends State<DetailHutang> {
 
   @override
   void dispose() {
-    _hutangController.dispose();
+    _piutangController.dispose();
     super.dispose();
   }
 
@@ -89,7 +88,7 @@ class _DetailHutangState extends State<DetailHutang> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          'Detail Hutang',
+          'Detail Piutang',
           style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
           ),
@@ -109,7 +108,7 @@ class _DetailHutangState extends State<DetailHutang> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.namaPemberiPinjam,
+                      widget.namaPeminjam,
                       style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -125,7 +124,7 @@ class _DetailHutangState extends State<DetailHutang> {
                         ),
                         const SizedBox(width: 5),
                         Text(
-                          widget.noteleponPemberiPinjam,
+                          widget.noteleponPeminjam,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 14,
@@ -166,11 +165,11 @@ class _DetailHutangState extends State<DetailHutang> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
-                              'Tanggal Pinjam',
+                              'Tanggal Di Pinjam',
                               style: TextStyle(color: Colors.white),
                             ),
                             Text(
-                              widget.tanggalPinjam,
+                              widget.tanggalDiPinjam,
                               style: const TextStyle(color: Colors.white),
                             ),
                           ],
@@ -195,11 +194,11 @@ class _DetailHutangState extends State<DetailHutang> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _buildAmountContainer(
-                            context, 'Pinjam', 'Rp${widget.nominalPinjam}'),
+                            context, 'Pinjam', 'Rp${widget.nominalDiPinjam}'),
                         _buildAmountContainer(
                             context, 'Dibayar', 'Rp$_totalBayar'),
                         _buildAmountContainer(
-                            context, 'Sisa', 'Rp$_sisaHutang'),
+                            context, 'Sisa', 'Rp$_sisaPiutang'),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -225,8 +224,8 @@ class _DetailHutangState extends State<DetailHutang> {
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
-                    .collection('bayarHutang')
-                    .where('hutangId', isEqualTo: widget.hutangId)
+                    .collection('bayarPiutang')
+                    .where('piutangId', isEqualTo: widget.piutangId)
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -274,72 +273,6 @@ class _DetailHutangState extends State<DetailHutang> {
               ),
             ),
             const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => FormBayar(
-                              hutangId: widget.hutangId,
-                              sisaHutang: _sisaHutang.toString(),
-                            ),
-                          ),
-                        ).then((_) {
-                          // Refresh data when coming back from FormBayar
-                          _loadData();
-                        });
-                      },
-                      style: TextButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        backgroundColor: const Color(0xFF24675B),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: const Text(
-                        'Bayar Hutang',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: TextButton(
-                      onPressed: () {
-                        // Logic for 'Pinjam Lagi' button
-                      },
-                      style: TextButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        backgroundColor: Colors.red,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: const Text(
-                        'Pinjam Lagi',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ),

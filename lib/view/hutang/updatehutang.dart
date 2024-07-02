@@ -1,9 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:tugasakhir/controller/hutangcontroller.dart';
 import 'package:tugasakhir/model/hutangmodel.dart';
-import 'package:tugasakhir/view/hutang.dart';
 
 class UpdateHutang extends StatefulWidget {
   const UpdateHutang(
@@ -35,76 +35,27 @@ class _UpdateHutangState extends State<UpdateHutang> {
   final _formKey = GlobalKey<FormState>();
 
   String? newNamaPemberiPinjam;
-  String? newNoTelepeonPemberiPinjam;
+  String? newNoTeleponPemberiPinjam;
   String? newNominalPinjam;
   String? newTanggalPinjam;
   String? newTanggalJatuhTempo;
   String? newDeskripsi;
 
-  Future<void> _showConfirmationDialog(BuildContext context) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Konfirmasi'),
-          content: const SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('Yakin ingin mengubah hutang?'),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Batal'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Ubah'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _updateHutang();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _updateHutang() {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-      HutangModel hutangmodel = HutangModel(
-        hutangId: widget.hutangId,
-        namaPemberiPinjam: newNamaPemberiPinjam!.toString(),
-        noteleponPemberiPinjam: newNoTelepeonPemberiPinjam!.toString(),
-        nominalPinjam: newNominalPinjam!.toString(),
-        tanggalPinjam: newTanggalPinjam!.toString(),
-        tanggalJatuhTempo: newTanggalJatuhTempo!.toString(),
-        deskripsi: newDeskripsi!.toString(),
-      );
-      hutangController.updateHutang(hutangmodel);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Hutang Berubah'),
-        ),
-      );
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const Hutang(),
-        ),
-      );
-    }
-  }
+  final TextEditingController _tanggalPinjamController =
+      TextEditingController();
+  final TextEditingController _tanggalJatuhTempoController =
+      TextEditingController();
+  final TextEditingController _nominalController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    _tanggalPinjamController.text = widget.tanggalPinjam ?? '';
+    _tanggalJatuhTempoController.text = widget.tanggalJatuhTempo ?? '';
+    _nominalController.text = widget.nominalPinjam ?? '';
+    newTanggalPinjam = widget.tanggalPinjam;
+    newTanggalJatuhTempo = widget.tanggalJatuhTempo;
+    newNominalPinjam = widget.nominalPinjam;
   }
 
   @override
@@ -112,12 +63,10 @@ class _UpdateHutangState extends State<UpdateHutang> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: const Color(0xFF24675B),
         title: Text(
           'Edit Hutang',
           style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
           ),
         ),
       ),
@@ -212,6 +161,12 @@ class _UpdateHutangState extends State<UpdateHutang> {
                             filled: true,
                             fillColor: Colors.white,
                           ),
+                          keyboardType: TextInputType
+                              .number, // Set the keyboard type to number
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter
+                                .digitsOnly // Allow only digits
+                          ],
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Nomor telepon tidak boleh kosong!';
@@ -223,7 +178,7 @@ class _UpdateHutangState extends State<UpdateHutang> {
                             return null;
                           },
                           onSaved: (value) {
-                            newNoTelepeonPemberiPinjam = value;
+                            newNoTeleponPemberiPinjam = value;
                           },
                           initialValue: widget.noteleponPemberiPinjam,
                         ),
@@ -250,6 +205,7 @@ class _UpdateHutangState extends State<UpdateHutang> {
                       Container(
                         width: 300,
                         child: TextFormField(
+                          controller: _nominalController,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.0),
@@ -257,18 +213,45 @@ class _UpdateHutangState extends State<UpdateHutang> {
                             filled: true,
                             fillColor: Colors.white,
                           ),
+                          keyboardType: TextInputType
+                              .number, // Set the keyboard type to number
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter
+                                .digitsOnly // Allow only digits
+                          ],
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Nominal Pinjaman tidak boleh kosong!';
-                            } else if (!RegExp(r'^\d+$').hasMatch(value)) {
-                              return 'Nominal Pinjaman harus berupa angka!';
+                              return 'Nominal tidak boleh kosong!';
+                            } else if (!RegExp(r'^\d{1,3}(.\d{3})*(\.\d+)?$')
+                                .hasMatch(value)) {
+                              return 'Nominal harus berisi angka saja.';
                             }
                             return null;
                           },
-                          onSaved: (value) {
-                            newNominalPinjam = value;
+                          onChanged: (value) {
+                            final numberFormat = NumberFormat("#,##0", "id_ID");
+                            final newValue = value.replaceAll(",", "");
+
+                            if (newValue.isNotEmpty) {
+                              final formattedNominal =
+                                  numberFormat.format(int.parse(newValue));
+
+                              setState(() {
+                                newNominalPinjam = formattedNominal;
+                              });
+
+                              _nominalController.value =
+                                  _nominalController.value.copyWith(
+                                text: formattedNominal,
+                                selection: TextSelection.collapsed(
+                                    offset: formattedNominal.length),
+                              );
+                            } else {
+                              setState(() {
+                                newNominalPinjam = null;
+                              });
+                            }
                           },
-                          initialValue: widget.nominalPinjam,
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -293,26 +276,46 @@ class _UpdateHutangState extends State<UpdateHutang> {
                       Container(
                         width: 300,
                         child: TextFormField(
+                          controller: _tanggalPinjamController,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.0),
                             ),
                             filled: true,
                             fillColor: Colors.white,
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.calendar_today),
+                              onPressed: () async {
+                                DateTime? tanggalp = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(2043),
+                                  lastDate: DateTime(2030),
+                                );
+
+                                if (tanggalp != null) {
+                                  newTanggalPinjam = DateFormat('dd-MM-yyyy')
+                                      .format(tanggalp)
+                                      .toString();
+
+                                  setState(() {
+                                    _tanggalPinjamController.text =
+                                        newTanggalPinjam!;
+                                  });
+                                }
+                              },
+                            ),
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Tanggal Pinjaman tidak boleh kosong!';
-                            } else if (!RegExp(r'^\d{4}-\d{2}-\d{2}$')
-                                .hasMatch(value)) {
-                              return 'Tanggal Pinjaman harus berformat yyyy-mm-dd!';
-                            }
-                            return null;
-                          },
                           onSaved: (value) {
                             newTanggalPinjam = value;
                           },
-                          initialValue: widget.tanggalPinjam,
+                          readOnly: true,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Tanggal tidak boleh kosong!';
+                            }
+                            return null;
+                          },
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -337,26 +340,47 @@ class _UpdateHutangState extends State<UpdateHutang> {
                       Container(
                         width: 300,
                         child: TextFormField(
+                          controller: _tanggalJatuhTempoController,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.0),
                             ),
                             filled: true,
                             fillColor: Colors.white,
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.calendar_today),
+                              onPressed: () async {
+                                DateTime? tanggaljt = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(2024),
+                                  lastDate: DateTime(2030),
+                                );
+
+                                if (tanggaljt != null) {
+                                  newTanggalJatuhTempo =
+                                      DateFormat('dd-MM-yyyy')
+                                          .format(tanggaljt)
+                                          .toString();
+
+                                  setState(() {
+                                    _tanggalJatuhTempoController.text =
+                                        newTanggalJatuhTempo!;
+                                  });
+                                }
+                              },
+                            ),
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Tanggal Jatuh Tempo tidak boleh kosong!';
-                            } else if (!RegExp(r'^\d{4}-\d{2}-\d{2}$')
-                                .hasMatch(value)) {
-                              return 'Tanggal Jatuh Tempo harus berformat yyyy-mm-dd!';
-                            }
-                            return null;
-                          },
                           onSaved: (value) {
                             newTanggalJatuhTempo = value;
                           },
-                          initialValue: widget.tanggalJatuhTempo,
+                          readOnly: true,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Tanggal tidak boleh kosong!';
+                            }
+                            return null;
+                          },
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -427,7 +451,7 @@ class _UpdateHutangState extends State<UpdateHutang> {
                               namaPemberiPinjam:
                                   newNamaPemberiPinjam!.toString(),
                               noteleponPemberiPinjam:
-                                  newNoTelepeonPemberiPinjam!.toString(),
+                                  newNoTeleponPemberiPinjam!.toString(),
                               nominalPinjam: newNominalPinjam!.toString(),
                               tanggalPinjam: newTanggalPinjam!.toString(),
                               tanggalJatuhTempo:
