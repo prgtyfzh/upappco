@@ -4,10 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tugasakhir/controller/hutangcontroller.dart';
 import 'package:tugasakhir/controller/piutangcontroller.dart';
-import 'package:tugasakhir/loginpage.dart';
 import 'package:tugasakhir/view/hutang.dart';
 import 'package:tugasakhir/view/piutang.dart';
 import 'package:tugasakhir/view/riwayat.dart';
+import 'package:tugasakhir/view/settings.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -21,8 +21,11 @@ class _HomePageState extends State<HomePage> {
   String totalSisaHutang = 'Loading...';
   String totalSisaPiutang = 'Loading...';
   int _currentIndex = 0;
-  List<String> _categories = ['Hutang', 'Piutang'];
-  List<String> _amounts = ['Loading...', 'Loading...'];
+  final List<String> _categories = ['Hutang', 'Piutang'];
+  List<String> _amounts = [
+    'Loading...',
+    'Loading...'
+  ]; // Updated _amounts to be mutable
 
   @override
   void initState() {
@@ -260,7 +263,7 @@ class _HomePageState extends State<HomePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const Hutang()),
-                  );
+                  ).then((value) => _updateDataOnReturn());
                 },
               ),
               const SizedBox(width: 20),
@@ -271,7 +274,7 @@ class _HomePageState extends State<HomePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const Piutang()),
-                  );
+                  ).then((value) => _updateDataOnReturn());
                 },
               ),
             ],
@@ -287,7 +290,7 @@ class _HomePageState extends State<HomePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const Riwayat()),
-                  );
+                  ).then((value) => _updateDataOnReturn());
                 },
               ),
               const SizedBox(width: 20),
@@ -297,8 +300,8 @@ class _HomePageState extends State<HomePage> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const LoginPage()),
-                  );
+                    MaterialPageRoute(builder: (context) => const Pengaturan()),
+                  ).then((value) => _updateDataOnReturn());
                 },
               ),
             ],
@@ -338,5 +341,12 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  // Fungsi untuk memperbarui data saat kembali dari halaman lain
+  void _updateDataOnReturn() {
+    fetchUserName();
+    fetchTotalSisaHutang();
+    fetchTotalSisaPiutang();
   }
 }

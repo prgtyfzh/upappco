@@ -66,7 +66,8 @@ class PiutangModel {
 
   String toJson() => json.encode(toMap());
 
-  factory PiutangModel.fromJson(String source) => PiutangModel.fromMap(json.decode(source));
+  factory PiutangModel.fromJson(String source) =>
+      PiutangModel.fromMap(json.decode(source));
 
   @override
   String toString() {
@@ -76,25 +77,25 @@ class PiutangModel {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-  
+
     return other is PiutangModel &&
-      other.piutangId == piutangId &&
-      other.namaPeminjam == namaPeminjam &&
-      other.noteleponPeminjam == noteleponPeminjam &&
-      other.nominalDiPinjam == nominalDiPinjam &&
-      other.tanggalDiPinjam == tanggalDiPinjam &&
-      other.tanggalJatuhTempo == tanggalJatuhTempo &&
-      other.deskripsi == deskripsi;
+        other.piutangId == piutangId &&
+        other.namaPeminjam == namaPeminjam &&
+        other.noteleponPeminjam == noteleponPeminjam &&
+        other.nominalDiPinjam == nominalDiPinjam &&
+        other.tanggalDiPinjam == tanggalDiPinjam &&
+        other.tanggalJatuhTempo == tanggalJatuhTempo &&
+        other.deskripsi == deskripsi;
   }
 
   @override
   int get hashCode {
     return piutangId.hashCode ^
-      namaPeminjam.hashCode ^
-      noteleponPeminjam.hashCode ^
-      nominalDiPinjam.hashCode ^
-      tanggalDiPinjam.hashCode ^
-      tanggalJatuhTempo.hashCode ^
-      deskripsi.hashCode;
+        namaPeminjam.hashCode ^
+        noteleponPeminjam.hashCode ^
+        nominalDiPinjam.hashCode ^
+        tanggalDiPinjam.hashCode ^
+        tanggalJatuhTempo.hashCode ^
+        deskripsi.hashCode;
   }
 }

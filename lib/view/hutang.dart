@@ -425,7 +425,7 @@ import 'package:tugasakhir/controller/hutangcontroller.dart';
 import 'package:tugasakhir/view/hutang/createhutang.dart';
 import 'package:tugasakhir/view/hutang/detailhutang.dart';
 import 'package:tugasakhir/view/hutang/qrcodehutang.dart';
-import 'package:tugasakhir/view/hutang/updatehutang.dart';
+import 'package:tugasakhir/view/qrcodescanhutang.dart';
 
 class Hutang extends StatefulWidget {
   const Hutang({Key? key}) : super(key: key);
@@ -458,6 +458,19 @@ class _HutangState extends State<Hutang> {
           'Daftar Hutang',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.qr_code_scanner),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => QRCodeScanHutang(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(
@@ -647,7 +660,6 @@ class _HutangState extends State<Hutang> {
               ];
             } else {
               return [
-                const PopupMenuItem<String>(value: 'edit', child: Text('Ubah')),
                 const PopupMenuItem<String>(
                     value: 'delete', child: Text('Hapus')),
                 const PopupMenuItem<String>(
@@ -714,25 +726,6 @@ class _HutangState extends State<Hutang> {
           });
         },
       );
-    } else if (value == 'edit') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => UpdateHutang(
-            hutangId: hutangData['hutangId'],
-            namaPemberiPinjam: hutangData['namaPemberiPinjam'],
-            noteleponPemberiPinjam: hutangData['noteleponPemberiPinjam'],
-            nominalPinjam: hutangData['nominalPinjam'],
-            tanggalPinjam: hutangData['tanggalPinjam'],
-            tanggalJatuhTempo: hutangData['tanggalJatuhTempo'],
-            deskripsi: hutangData['deskripsi'],
-          ),
-        ),
-      ).then((_) {
-        setState(() {
-          _hutangController.getHutangSortedByDate();
-        });
-      });
     } else if (value == 'delete') {
       _showConfirmationDialog(
         context,

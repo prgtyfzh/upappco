@@ -5,14 +5,14 @@ import 'package:tugasakhir/loginpage.dart';
 import 'package:tugasakhir/model/usermodel.dart';
 import 'package:tugasakhir/view/profil/updateakun.dart';
 
-class Settings extends StatefulWidget {
-  const Settings({Key? key}) : super(key: key);
+class Pengaturan extends StatefulWidget {
+  const Pengaturan({Key? key}) : super(key: key);
 
   @override
-  State<Settings> createState() => _SettingsState();
+  State<Pengaturan> createState() => _PengaturanState();
 }
 
-class _SettingsState extends State<Settings> {
+class _PengaturanState extends State<Pengaturan> {
   late Future<UserModel?> _userDataFuture;
 
   Future<UserModel?> _getUserData() async {

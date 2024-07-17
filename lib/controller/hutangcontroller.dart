@@ -337,7 +337,6 @@
 // }
 
 import 'dart:async';
-import 'dart:nativewrappers/_internal/vm/lib/internal_patch.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
@@ -513,7 +512,7 @@ class HutangController {
       bayarHutang.docs.forEach((doc) {
         BayarHutangModel bayarHutangModel =
             BayarHutangModel.fromMap(doc.data() as Map<String, dynamic>);
-        totalBayar += double.parse(bayarHutangModel.nominalBayar
+        totalBayar += double.tryParse(bayarHutangModel.nominalBayar
                 .replaceAll('.', '')
                 .replaceAll(',', '')) ??
             0.0;
@@ -657,6 +656,33 @@ class HutangController {
       rethrow;
     }
   }
+
+  // Future<void> updateHutangWithPayments(
+  //     String hutangId, double totalBayar, double sisaHutang) async {
+  //   try {
+  //     await hutangCollection.doc(hutangId).update({
+  //       'totalBayar': FieldValue.increment(totalBayar),
+  //       'sisaHutang': FieldValue.increment(-sisaHutang),
+  //     });
+  //   } catch (e) {
+  //     throw Exception('Failed to update Hutang with payments: $e');
+  //   }
+  // }
+
+  // // Method to get nominal pinjam by hutangId
+  // Future<String?> getNominalPinjam(String hutangId) async {
+  //   try {
+  //     DocumentSnapshot doc =
+  //         await _firestore.collection('hutang').doc(hutangId).get();
+  //     if (doc.exists) {
+  //       return doc.data()?['nominalPinjam'].toString();
+  //     }
+  //     return null;
+  //   } catch (e) {
+  //     print('Error getting nominal pinjam: $e');
+  //     return null;
+  //   }
+  // }
 
   void dispose() {
     streamController.close();

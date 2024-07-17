@@ -3,8 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tugasakhir/controller/piutangcontroller.dart';
 import 'package:tugasakhir/view/piutang/createpiutang.dart';
 import 'package:tugasakhir/view/piutang/detailpiutang.dart';
-
-import 'package:tugasakhir/view/qrcodescan.dart';
+import 'package:tugasakhir/view/piutang/qrcodepiutang.dart';
+import 'package:tugasakhir/view/qrcodescanpiutang.dart';
 
 class Piutang extends StatefulWidget {
   const Piutang({Key? key}) : super(key: key);
@@ -44,8 +44,7 @@ class _PiutangState extends State<Piutang> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      QRCodeScan(), // Replace with your QRCodeScan page
+                  builder: (context) => QRCodeScanPiutang(),
                 ),
               );
             },
@@ -77,7 +76,7 @@ class _PiutangState extends State<Piutang> {
                       var piutangData = data[index];
                       return FutureBuilder<Map<String, String>>(
                         future: _loadData(piutangData['piutangId'],
-                            piutangData['nominalPinjam']),
+                            piutangData['nominalDiPinjam']),
                         builder: (context,
                             AsyncSnapshot<Map<String, String>> snapshot) {
                           if (snapshot.connectionState ==
@@ -106,7 +105,7 @@ class _PiutangState extends State<Piutang> {
                                   .replaceAll(',', '')) ??
                               0.0;
                           double nominalPiutangDouble = double.tryParse(
-                                  piutangData['nominalPinjam']
+                                  piutangData['nominalDiPinjam']
                                       .replaceAll('.', '')
                                       .replaceAll(',', '')) ??
                               1.0;
@@ -204,11 +203,11 @@ class _PiutangState extends State<Piutang> {
   }
 
   Future<Map<String, String>> _loadData(
-      String piutangId, String nominalPinjam) async {
+      String piutangId, String nominalDiPinjam) async {
     String totalBayar =
         await _piutangController.getTotalNominalBayar(piutangId);
     String sisaPiutang = await _piutangController.calculateTotalSisaPiutang(
-        piutangId, nominalPinjam);
+        piutangId, nominalDiPinjam);
     return {
       'totalBayar': totalBayar,
       'sisaPiutang': sisaPiutang,
@@ -222,7 +221,7 @@ class _PiutangState extends State<Piutang> {
       children: [
         Expanded(
           child: Text(
-            piutangData['namaPemberiPiutang'],
+            piutangData['namaPeminjam'],
             style: const TextStyle(
                 color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
           ),
@@ -240,7 +239,6 @@ class _PiutangState extends State<Piutang> {
               ];
             } else {
               return [
-                const PopupMenuItem<String>(value: 'edit', child: Text('Ubah')),
                 const PopupMenuItem<String>(
                     value: 'delete', child: Text('Hapus')),
                 const PopupMenuItem<String>(
@@ -249,7 +247,7 @@ class _PiutangState extends State<Piutang> {
             }
           },
           onSelected: (String value) {
-            // _handleMenuSelection(value, piutangData);
+            _handleMenuSelection(value, piutangData);
           },
         ),
       ],
@@ -263,8 +261,9 @@ class _PiutangState extends State<Piutang> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Tanggal Pinjam', style: TextStyle(color: Colors.white)),
-            Text(piutangData['tanggalPinjam'],
+            const Text('Tanggal DiPinjam',
+                style: TextStyle(color: Colors.white)),
+            Text(piutangData['tanggalDiPinjam'],
                 style: const TextStyle(color: Colors.white)),
           ],
         ),
@@ -287,10 +286,40 @@ class _PiutangState extends State<Piutang> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildAmountContainer(context, 'Piutang',
-            'Rp${piutangData['nominalPinjam']}'), // Menggunakan nominalPinjam
+            'Rp${piutangData['nominalDiPinjam']}'), // Menggunakan nominalPinjam
         _buildAmountContainer(context, 'Dibayar', 'Rp$totalBayar'),
         _buildAmountContainer(context, 'Sisa', 'Rp$sisaPiutang'),
       ],
+    );
+  }
+
+  void _showConfirmationDialog(BuildContext context,
+      {required String title,
+      required String content,
+      required VoidCallback onConfirm}) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                onConfirm();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -321,45 +350,43 @@ class _PiutangState extends State<Piutang> {
       ),
     );
   }
+
+  void _handleMenuSelection(String value, var piutangData) {
+    if (value == 'selesai') {
+      _showConfirmationDialog(
+        context,
+        title: 'Konfirmasi Penyelesaian Piutang',
+        content: 'Apakah Anda yakin ingin menyelesaikan piutang ini?',
+        onConfirm: () {
+          _piutangController.movePiutangToHistory(piutangData['piutangId']);
+          setState(() {
+            _piutangController.getPiutangSortedByDate();
+          });
+        },
+      );
+    } else if (value == 'delete') {
+      _showConfirmationDialog(
+        context,
+        title: 'Konfirmasi Hapus Piutang',
+        content: 'Apakah Anda yakin ingin menghapus piutang ini?',
+        onConfirm: () {
+          _piutangController.removePiutang(piutangData['piutangId']);
+          setState(() {
+            _piutangController.getPiutangSortedByDate();
+          });
+        },
+      );
+    } else if (value == 'qrCode') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              QRCodePiutang(piutangId: piutangData['piutangId']),
+        ),
+      );
+    }
+  }
 }
-
-
-  // void _handleMenuSelection(String value, var piutangData) {
-  //   switch (value) {
-  //     case 'edit':
-  //       Navigator.push(
-  //         context,
-  //         MaterialPageRoute(
-  //           builder: (context) => UpdatePiutang(
-  //             piutangData: piutangData,
-  //           ),
-  //         ),
-  //       ).then((_) {
-  //         setState(() {
-  //           _piutangController.getPiutangSortedByDate();
-  //         });
-  //       });
-  //       break;
-  //     case 'delete':
-  //       _piutangController.removePiutang(piutangData['piutangId']);
-  //       break;
-  //     case 'qrCode':
-  //       Navigator.push(
-  //         context,
-  //         MaterialPageRoute(
-  //           builder: (context) => QRCodePiutang(
-  //             piutangId: piutangData['piutangId'],
-  //           ),
-  //         ),
-  //       );
-  //       break;
-  //     case 'selesai':
-  //       // Tambahkan logika untuk menyelesaikan piutang di sini
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }
 
 
 // import 'package:flutter/material.dart';

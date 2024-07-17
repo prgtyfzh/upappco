@@ -109,6 +109,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:tugasakhir/model/bayarhutangmodel.dart';
+import 'package:tugasakhir/model/bayarpiutangmodel.dart';
 
 import 'package:tugasakhir/model/piutangmodel.dart';
 
@@ -118,8 +119,8 @@ class PiutangController {
 
   final CollectionReference piutangCollection =
       FirebaseFirestore.instance.collection('piutang');
-  final CollectionReference bayarHutangCollection =
-      FirebaseFirestore.instance.collection('bayarHutang');
+  final CollectionReference bayarPiutangCollection =
+      FirebaseFirestore.instance.collection('bayarPiutang');
   final StreamController<List<DocumentSnapshot>> streamController =
       StreamController<List<DocumentSnapshot>>.broadcast();
 
@@ -144,6 +145,46 @@ class PiutangController {
       );
 
       await docRef.update(updatedPiutangModel.toMap());
+    }
+  }
+
+  Future<void> addBayarPiutang(BayarPiutangModel bayarPiutangModel) async {
+    try {
+      String nominalDiPinjam =
+          await getNominalDiPinjam(bayarPiutangModel.piutangId);
+      String sisaPiutangStr = await calculateTotalSisaPiutang(
+          bayarPiutangModel.piutangId ?? '', nominalDiPinjam ?? '0');
+      double sisaPiutang = double.tryParse(
+              sisaPiutangStr.replaceAll('.', '').replaceAll(',', '')) ??
+          0.0;
+
+      double nominalBayar = double.tryParse(bayarPiutangModel.nominalBayar
+              .replaceAll('.', '')
+              .replaceAll(',', '')) ??
+          0.0;
+
+      if (nominalBayar > sisaPiutang) {
+        throw Exception('Nominal bayar tidak boleh melebihi sisa piutang');
+      }
+
+      final bayarPiutang = bayarPiutangModel.toMap();
+      bayarPiutang['userId'] =
+          _auth.currentUser!.uid; // Add user ID to the document
+      final DocumentReference docRef =
+          await bayarPiutangCollection.add(bayarPiutang);
+      final String docID = docRef.id;
+
+      final BayarPiutangModel updatedBayarPiutangModel = BayarPiutangModel(
+        bayarPiutangId: docID,
+        piutangId: bayarPiutangModel.piutangId,
+        nominalBayar: bayarPiutangModel.nominalBayar,
+        tanggalBayar: bayarPiutangModel.tanggalBayar,
+      );
+
+      await docRef.update(updatedBayarPiutangModel.toMap());
+    } catch (e) {
+      print('Error adding bayar hutang: $e');
+      rethrow;
     }
   }
 
@@ -254,14 +295,14 @@ class PiutangController {
 
   Future<String> getTotalNominalBayar(String piutangId) async {
     try {
-      final bayarHutang = await bayarHutangCollection
+      final bayarPiutang = await bayarPiutangCollection
           .where('piutangId', isEqualTo: piutangId)
           .get();
       double totalBayar = 0;
-      bayarHutang.docs.forEach((doc) {
-        BayarHutangModel bayarHutangModel =
-            BayarHutangModel.fromMap(doc.data() as Map<String, dynamic>);
-        totalBayar += double.parse(bayarHutangModel.nominalBayar
+      bayarPiutang.docs.forEach((doc) {
+        BayarPiutangModel bayarPiutangModel =
+            BayarPiutangModel.fromMap(doc.data() as Map<String, dynamic>);
+        totalBayar += double.parse(bayarPiutangModel.nominalBayar
                 .replaceAll('.', '')
                 .replaceAll(',', '')) ??
             0.0;
@@ -277,17 +318,16 @@ class PiutangController {
   }
 
   Future<String> calculateTotalSisaPiutang(
-      String piutangId, String nominalPinjam) async {
+      String piutangId, String nominalDiPinjam) async {
     try {
-      String totalBayarStr = await getTotalNominalBayar(
-          piutangId); // Assuming piutangId is a non-nullable String
+      String totalBayarStr = await getTotalNominalBayar(piutangId);
       double totalBayar = double.tryParse(
               totalBayarStr.replaceAll('.', '').replaceAll(',', '')) ??
           0.0;
-      double nominalPinjamDouble =
-          double.tryParse(nominalPinjam.replaceAll('.', '')) ?? 0.0;
+      double nominalDiPinjamDouble =
+          double.tryParse(nominalDiPinjam.replaceAll('.', '')) ?? 0.0;
 
-      double sisaPiutang = nominalPinjamDouble - totalBayar;
+      double sisaPiutang = nominalDiPinjamDouble - totalBayar;
       if (sisaPiutang < 0) {
         sisaPiutang = 0;
       }
@@ -324,19 +364,17 @@ class PiutangController {
         for (var doc in piutang.docs) {
           PiutangModel piutangModel =
               PiutangModel.fromMap(doc.data() as Map<String, dynamic>);
-          String nominalDiPinjam = piutangModel.nominalDiPinjam ??
-              '0'; // Handle potential null value
-          double nominalDiPinjamDouble =
-              double.tryParse(nominalDiPinjam.replaceAll('.', '')) ?? 0.0;
+          String nominalDiPinjam = piutangModel.nominalDiPinjam ?? '0';
 
-          String totalNominalBayar = await getTotalNominalBayar(
-              piutangModel.piutangId ?? ''); // Ensure piutangId is non-null
-          double totalNominalBayarDouble =
-              double.tryParse(totalNominalBayar.replaceAll('.', '')) ?? 0.0;
+          String sisaPiutangStr = await calculateTotalSisaPiutang(
+              piutangModel.piutangId ?? '', nominalDiPinjam);
 
-          totalSisaPiutang += nominalDiPinjamDouble - totalNominalBayarDouble;
+          double sisaPiutang = double.tryParse(
+                  sisaPiutangStr.replaceAll('.', '').replaceAll(',', '')) ??
+              0.0;
+          totalSisaPiutang += sisaPiutang;
         }
-        return totalSisaPiutang.toStringAsFixed(3);
+        return NumberFormat.decimalPattern('id_ID').format(totalSisaPiutang);
       } catch (e) {
         print('Error while getting total sisa piutang: $e');
         return '0';
@@ -360,6 +398,39 @@ class PiutangController {
         .doc(piutangmodel.piutangId)
         .update(piutangModel.toMap());
   }
+
+  Future<void> movePiutangToHistory(String piutangId) async {
+    try {
+      final DocumentSnapshot snapshot =
+          await piutangCollection.doc(piutangId).get();
+      if (snapshot.exists) {
+        final data = snapshot.data() as Map<String, dynamic>?;
+        if (data != null) {
+          data['userId'] =
+              _auth.currentUser!.uid; // Add user ID to the document
+          await _firestore.collection('history').doc(piutangId).set(data);
+          await piutangCollection.doc(piutangId).delete();
+        }
+      } else {
+        throw Exception('Hutang with id $piutangId does not exist');
+      }
+    } catch (e) {
+      print('Error moving hutang to history: $e');
+      rethrow;
+    }
+  }
+
+  // Future<void> updatePiutangWithPayments(
+  //     String piutangId, double totalBayar, double sisaPiutang) async {
+  //   try {
+  //     await piutangCollection.doc(piutangId).update({
+  //       'totalBayar': FieldValue.increment(totalBayar),
+  //       'sisaPiutang': FieldValue.increment(-sisaPiutang),
+  //     });
+  //   } catch (e) {
+  //     throw Exception('Failed to update Piutang with payments: $e');
+  //   }
+  // }
 
   void dispose() {
     streamController.close();

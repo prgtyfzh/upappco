@@ -108,3 +108,123 @@ class HutangModel {
     // gambar.hashCode;
   }
 }
+
+// import 'dart:convert';
+
+// import 'package:flutter/widgets.dart';
+
+// class HutangModel {
+//   String? hutangId;
+//   final String namaPemberiPinjam;
+//   final String noteleponPemberiPinjam;
+//   final String nominalPinjam;
+//   final String tanggalPinjam;
+//   final String tanggalJatuhTempo;
+//   final String deskripsi;
+//   String? totalBayar;
+//   String? sisaHutang;
+//   // final String gambar;
+//   HutangModel({
+//     this.hutangId,
+//     required this.namaPemberiPinjam,
+//     required this.noteleponPemberiPinjam,
+//     required this.nominalPinjam,
+//     required this.tanggalPinjam,
+//     required this.tanggalJatuhTempo,
+//     required this.deskripsi,
+//     this.totalBayar,
+//     this.sisaHutang,
+//   });
+
+//   HutangModel copyWith({
+//     ValueGetter<String?>? hutangId,
+//     String? namaPemberiPinjam,
+//     String? noteleponPemberiPinjam,
+//     String? nominalPinjam,
+//     String? tanggalPinjam,
+//     String? tanggalJatuhTempo,
+//     String? deskripsi,
+//     ValueGetter<String?>? totalBayar,
+//     ValueGetter<String?>? sisaHutang,
+//   }) {
+//     return HutangModel(
+//       hutangId: hutangId != null ? hutangId() : this.hutangId,
+//       namaPemberiPinjam: namaPemberiPinjam ?? this.namaPemberiPinjam,
+//       noteleponPemberiPinjam:
+//           noteleponPemberiPinjam ?? this.noteleponPemberiPinjam,
+//       nominalPinjam: nominalPinjam ?? this.nominalPinjam,
+//       tanggalPinjam: tanggalPinjam ?? this.tanggalPinjam,
+//       tanggalJatuhTempo: tanggalJatuhTempo ?? this.tanggalJatuhTempo,
+//       deskripsi: deskripsi ?? this.deskripsi,
+//       totalBayar: totalBayar != null ? totalBayar() : this.totalBayar,
+//       sisaHutang: sisaHutang != null ? sisaHutang() : this.sisaHutang,
+//     );
+//   }
+
+//   Map<String, dynamic> toMap() {
+//     return {
+//       'hutangId': hutangId,
+//       'namaPemberiPinjam': namaPemberiPinjam,
+//       'noteleponPemberiPinjam': noteleponPemberiPinjam,
+//       'nominalPinjam': nominalPinjam,
+//       'tanggalPinjam': tanggalPinjam,
+//       'tanggalJatuhTempo': tanggalJatuhTempo,
+//       'deskripsi': deskripsi,
+//       'totalBayar': totalBayar,
+//       'sisaHutang': sisaHutang,
+//     };
+//   }
+
+//   factory HutangModel.fromMap(Map<String, dynamic> map) {
+//     return HutangModel(
+//       hutangId: map['hutangId'],
+//       namaPemberiPinjam: map['namaPemberiPinjam'] ?? '',
+//       noteleponPemberiPinjam: map['noteleponPemberiPinjam'] ?? '',
+//       nominalPinjam: map['nominalPinjam'] ?? '',
+//       tanggalPinjam: map['tanggalPinjam'] ?? '',
+//       tanggalJatuhTempo: map['tanggalJatuhTempo'] ?? '',
+//       deskripsi: map['deskripsi'] ?? '',
+//       totalBayar: map['totalBayar'],
+//       sisaHutang: map['sisaHutang'],
+//     );
+//   }
+
+//   String toJson() => json.encode(toMap());
+
+//   factory HutangModel.fromJson(String source) =>
+//       HutangModel.fromMap(json.decode(source));
+
+//   @override
+//   String toString() {
+//     return 'HutangModel(hutangId: $hutangId, namaPemberiPinjam: $namaPemberiPinjam, noteleponPemberiPinjam: $noteleponPemberiPinjam, nominalPinjam: $nominalPinjam, tanggalPinjam: $tanggalPinjam, tanggalJatuhTempo: $tanggalJatuhTempo, deskripsi: $deskripsi, totalBayar: $totalBayar, sisaHutang: $sisaHutang)';
+//   }
+
+//   @override
+//   bool operator ==(Object other) {
+//     if (identical(this, other)) return true;
+
+//     return other is HutangModel &&
+//         other.hutangId == hutangId &&
+//         other.namaPemberiPinjam == namaPemberiPinjam &&
+//         other.noteleponPemberiPinjam == noteleponPemberiPinjam &&
+//         other.nominalPinjam == nominalPinjam &&
+//         other.tanggalPinjam == tanggalPinjam &&
+//         other.tanggalJatuhTempo == tanggalJatuhTempo &&
+//         other.deskripsi == deskripsi &&
+//         other.totalBayar == totalBayar &&
+//         other.sisaHutang == sisaHutang;
+//   }
+
+//   @override
+//   int get hashCode {
+//     return hutangId.hashCode ^
+//         namaPemberiPinjam.hashCode ^
+//         noteleponPemberiPinjam.hashCode ^
+//         nominalPinjam.hashCode ^
+//         tanggalPinjam.hashCode ^
+//         tanggalJatuhTempo.hashCode ^
+//         deskripsi.hashCode ^
+//         totalBayar.hashCode ^
+//         sisaHutang.hashCode;
+//   }
+// }

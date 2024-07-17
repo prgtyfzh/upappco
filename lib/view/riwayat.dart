@@ -103,147 +103,149 @@ class _RiwayatState extends State<Riwayat> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text(
-          'Riwayat Hutang',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: SafeArea(
-        child: StreamBuilder<List<DocumentSnapshot>>(
-          stream: _hutangController.hutangHistoryStream(),
-          builder: (context, AsyncSnapshot<List<DocumentSnapshot>> snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
+        // appBar: AppBar(
+        //   centerTitle: true,
+        //   title: const Text(
+        //     'Riwayat Hutang',
+        //     style: TextStyle(fontWeight: FontWeight.bold),
+        //   ),
+        // ),
+        // body: SafeArea(
+        //   child: StreamBuilder<List<DocumentSnapshot>>(
+        //     stream: _hutangController.hutangHistoryStream(),
+        //     builder: (context, AsyncSnapshot<List<DocumentSnapshot>> snapshot) {
+        //       if (snapshot.connectionState == ConnectionState.waiting) {
+        //         return const Center(
+        //           child: CircularProgressIndicator(),
+        //         );
+        //       }
 
-            if (snapshot.hasError) {
-              return const Center(
-                child: Text('Terjadi kesalahan saat memuat data'),
-              );
-            }
+        //       if (snapshot.hasError) {
+        //         return const Center(
+        //           child: Text('Terjadi kesalahan saat memuat data'),
+        //         );
+        //       }
 
-            if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(
-                child: Text('Tidak ada riwayat hutang'),
-              );
-            }
+        //       if (!snapshot.hasData || snapshot.data!.isEmpty) {
+        //         return const Center(
+        //           child: Text('Tidak ada riwayat hutang'),
+        //         );
+        //       }
 
-            final List<DocumentSnapshot> data = snapshot.data!;
+        //       final List<DocumentSnapshot> data = snapshot.data!;
 
-            return ListView.builder(
-              itemCount: data.length,
-              itemBuilder: (context, index) {
-                var hutangData = data[index].data() as Map<String, dynamic>;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 5.0,
-                    horizontal: 20.0,
-                  ),
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DetailHutang(
-                            namaPemberiPinjam: hutangData['namaPemberiPinjam'],
-                            noteleponPemberiPinjam:
-                                hutangData['noteleponPemberiPinjam'],
-                            nominalPinjam: hutangData['nominalPinjam'],
-                            tanggalPinjam: hutangData['tanggalPinjam'],
-                            tanggalJatuhTempo: hutangData['tanggalJatuhTempo'],
-                            deskripsi: hutangData['deskripsi'],
-                            hutangId: hutangData['hutangId'],
-                          ),
-                        ),
-                      ).then((_) {
-                        // Refresh the data after returning from DetailHutang screen
-                        _hutangController.getHutangHistorySortedByDate();
-                      });
-                    },
-                    child: Card(
-                      color: const Color(0xFF24675B),
-                      elevation: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    hutangData['namaPemberiPinjam'],
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 5),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Tanggal Pinjam',
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                    Text(
-                                      hutangData['tanggalPinjam'],
-                                      style:
-                                          const TextStyle(color: Colors.white),
-                                    ),
-                                  ],
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Tanggal Jatuh Tempo',
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                    Text(
-                                      hutangData['tanggalJatuhTempo'],
-                                      style:
-                                          const TextStyle(color: Colors.white),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                _buildAmountContainer(
-                                  context,
-                                  'Pinjam',
-                                  'Rp ${hutangData['nominalPinjam']}',
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-        ),
-      ),
-    );
+        //       return ListView.builder(
+        //         itemCount: data.length,
+        //         itemBuilder: (context, index) {
+        //           var hutangData = data[index].data() as Map<String, dynamic>;
+        //           return Padding(
+        //             padding: const EdgeInsets.symmetric(
+        //               vertical: 5.0,
+        //               horizontal: 20.0,
+        //             ),
+        //             child: GestureDetector(
+        //               onTap: () {
+        //                 Navigator.push(
+        //                   context,
+        //                   MaterialPageRoute(
+        //                     builder: (context) => DetailHutang(
+        //                       namaPemberiPinjam: hutangData['namaPemberiPinjam'],
+        //                       noteleponPemberiPinjam:
+        //                           hutangData['noteleponPemberiPinjam'],
+        //                       nominalPinjam: hutangData['nominalPinjam'],
+        //                       tanggalPinjam: hutangData['tanggalPinjam'],
+        //                       tanggalJatuhTempo: hutangData['tanggalJatuhTempo'],
+        //                       deskripsi: hutangData['deskripsi'],
+        //                       hutangId: hutangData['hutangId'],
+        //                       paymentSnapshots: paymentSnapshots,
+        //                       sisaHutang: sisaHutang,
+        //                     ),
+        //                   ),
+        //                 ).then((_) {
+        //                   // Refresh the data after returning from DetailHutang screen
+        //                   _hutangController.getHutangHistorySortedByDate();
+        //                 });
+        //               },
+        //               child: Card(
+        //                 color: const Color(0xFF24675B),
+        //                 elevation: 4,
+        //                 child: Padding(
+        //                   padding: const EdgeInsets.all(10.0),
+        //                   child: Column(
+        //                     crossAxisAlignment: CrossAxisAlignment.start,
+        //                     children: [
+        //                       Row(
+        //                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //                         children: [
+        //                           Expanded(
+        //                             child: Text(
+        //                               hutangData['namaPemberiPinjam'],
+        //                               style: const TextStyle(
+        //                                 color: Colors.white,
+        //                                 fontWeight: FontWeight.bold,
+        //                                 fontSize: 20,
+        //                               ),
+        //                             ),
+        //                           ),
+        //                         ],
+        //                       ),
+        //                       const SizedBox(height: 5),
+        //                       Row(
+        //                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //                         children: [
+        //                           Column(
+        //                             crossAxisAlignment: CrossAxisAlignment.start,
+        //                             children: [
+        //                               const Text(
+        //                                 'Tanggal Pinjam',
+        //                                 style: TextStyle(color: Colors.white),
+        //                               ),
+        //                               Text(
+        //                                 hutangData['tanggalPinjam'],
+        //                                 style:
+        //                                     const TextStyle(color: Colors.white),
+        //                               ),
+        //                             ],
+        //                           ),
+        //                           Column(
+        //                             crossAxisAlignment: CrossAxisAlignment.start,
+        //                             children: [
+        //                               const Text(
+        //                                 'Tanggal Jatuh Tempo',
+        //                                 style: TextStyle(color: Colors.white),
+        //                               ),
+        //                               Text(
+        //                                 hutangData['tanggalJatuhTempo'],
+        //                                 style:
+        //                                     const TextStyle(color: Colors.white),
+        //                               ),
+        //                             ],
+        //                           ),
+        //                         ],
+        //                       ),
+        //                       const SizedBox(height: 10),
+        //                       Row(
+        //                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //                         children: [
+        //                           _buildAmountContainer(
+        //                             context,
+        //                             'Pinjam',
+        //                             'Rp ${hutangData['nominalPinjam']}',
+        //                           ),
+        //                         ],
+        //                       ),
+        //                     ],
+        //                   ),
+        //                 ),
+        //               ),
+        //             ),
+        //           );
+        //         },
+        //       );
+        //     },
+        //   ),
+        // ),
+        );
   }
 
   Widget _buildAmountContainer(

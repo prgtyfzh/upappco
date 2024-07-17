@@ -22,7 +22,6 @@ class _CreateHutangState extends State<CreateHutang> {
   String? tanggalPinjam;
   String? tanggalJatuhTempo;
   String? deskripsi;
-  String? gambar;
 
   TextEditingController nominalController = TextEditingController();
   final TextEditingController _tanggalPinjamController =
@@ -30,18 +29,6 @@ class _CreateHutangState extends State<CreateHutang> {
   final TextEditingController _tanggalJatuhTempoController =
       TextEditingController();
 
-  // File? _selectedFile;
-
-  // final _picker = ImagePicker();
-
-  // Future<void> _pickImage() async {
-  //   final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-
-  //   if (pickedFile != null) {
-  //     setState(() {
-  //       _selectedFile = File(pickedFile.path);
-  //     });
-  //   }
   // }
 
   @override
@@ -419,21 +406,6 @@ class _CreateHutangState extends State<CreateHutang> {
                           },
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      // ElevatedButton.icon(
-                      //   onPressed: _pickImage,
-                      //   icon: const Icon(Icons.upload_file),
-                      //   label: const Text('Upload Gambar'),
-                      // ),
-                      // if (_selectedFile != null)
-                      //   Padding(
-                      //     padding: const EdgeInsets.all(8.0),
-                      //     child: Image.file(
-                      //       _selectedFile!,
-                      //       height: 100,
-                      //       width: 100,
-                      //     ),
-                      //   ),
                       const SizedBox(height: 40),
                       ElevatedButton(
                         onPressed: () {
