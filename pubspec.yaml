@@ -17,13 +17,15 @@ dependencies:
   cloud_firestore: ^5.0.2
   cupertino_icons: ^1.0.6
   google_fonts: ^6.2.1
-  image_picker: ^1.1.1
+  image_picker: ^1.1.2
   firebase_analytics: ^11.1.0
   intl: ^0.19.0
   qr_flutter: ^4.1.0
   qr_code_scanner: ^1.0.1
   permission_handler: ^11.3.1
   carousel_slider: ^4.2.1
+  google_ml_kit: ^0.18.0
+  flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
   flutter_test:
@@ -36,3 +38,7 @@ flutter:
   assets:
     - assets/image/logoupapp.png
     - assets/image/logoupapp2.png
+
+flutter_icons:
+  android: true
+  image_path: assets/image/logoupapp.png

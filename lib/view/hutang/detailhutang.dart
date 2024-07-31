@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:tugasakhir/view/hutang/formbayar.dart';
+import 'package:tugasakhir/view/formbayar.dart';
 import 'package:tugasakhir/controller/hutangcontroller.dart';
 
 class DetailHutang extends StatefulWidget {
@@ -12,6 +12,7 @@ class DetailHutang extends StatefulWidget {
   final String tanggalJatuhTempo;
   final String deskripsi;
   final String hutangId;
+  final bool fromRiwayat;
 
   const DetailHutang({
     Key? key,
@@ -22,6 +23,7 @@ class DetailHutang extends StatefulWidget {
     required this.tanggalJatuhTempo,
     required this.deskripsi,
     required this.hutangId,
+    this.fromRiwayat = false,
   }) : super(key: key);
 
   @override
@@ -225,7 +227,7 @@ class _DetailHutangState extends State<DetailHutang> {
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
-                    .collection('bayarHutang')
+                    .collection('pembayaran')
                     .where('hutangId', isEqualTo: widget.hutangId)
                     .snapshots(),
                 builder: (context, snapshot) {
@@ -274,47 +276,48 @@ class _DetailHutangState extends State<DetailHutang> {
               ),
             ),
             const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => FormBayar(
-                              hutangId: widget.hutangId,
-                              sisaHutang: _sisaHutang.toString(),
+            if (!widget.fromRiwayat)
+              Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FormBayar(
+                                hutangId: widget.hutangId,
+                                sisaHutang: _sisaHutang.toString(),
+                              ),
                             ),
+                          ).then((_) {
+                            // Refresh data when coming back from FormBayar
+                            _loadData();
+                          });
+                        },
+                        style: TextButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                        ).then((_) {
-                          // Refresh data when coming back from FormBayar
-                          _loadData();
-                        });
-                      },
-                      style: TextButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          backgroundColor: const Color(0xFF24675B),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        backgroundColor: const Color(0xFF24675B),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: const Text(
-                        'Tambahkan Pembayaran',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                        child: const Text(
+                          'Tambahkan Pembayaran',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

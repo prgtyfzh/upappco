@@ -1,116 +1,8 @@
-// import 'dart:async';
-
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:qr_code_scanner/qr_code_scanner.dart';
-
-// import '../model/piutangmodel.dart';
-
-// class PiutangController {
-//   final piutangCollection = FirebaseFirestore.instance.collection('piutang');
-//   final StreamController<List<DocumentSnapshot>> streamController =
-//       StreamController<List<DocumentSnapshot>>.broadcast();
-
-//   Stream<List<DocumentSnapshot>> get stream => streamController.stream;
-//   List<DocumentSnapshot> currentData = [];
-//   List<PiutangModel> piutangList = [];
-
-//   Future<void> addPiutang(PiutangModel piutangmodel) async {
-//     final piutang = piutangmodel.toMap();
-//     final DocumentReference docRef = await piutangCollection.add(piutang);
-//     final String docID = docRef.id;
-//     final PiutangModel piutangModel = PiutangModel(
-//       piutangId: docID,
-//       namaPeminjam: piutangmodel.namaPeminjam,
-//       noteleponPeminjam: piutangmodel.noteleponPeminjam,
-//       nominalDiPinjam: piutangmodel.nominalDiPinjam,
-//       tanggalDiPinjam: piutangmodel.tanggalDiPinjam,
-//       tanggalJatuhTempo: piutangmodel.tanggalJatuhTempo,
-//       deskripsi: piutangmodel.deskripsi,
-//     );
-
-//     await docRef.update(piutangModel.toMap());
-//   }
-
-//   Future<void> updatePiutang(PiutangModel piutangmodel) async {
-//     final PiutangModel piutangModel = PiutangModel(
-//       piutangId: piutangmodel.piutangId,
-//       namaPeminjam: piutangmodel.namaPeminjam,
-//       noteleponPeminjam: piutangmodel.noteleponPeminjam,
-//       nominalDiPinjam: piutangmodel.nominalDiPinjam,
-//       tanggalDiPinjam: piutangmodel.tanggalDiPinjam,
-//       tanggalJatuhTempo: piutangmodel.tanggalJatuhTempo,
-//       deskripsi: piutangmodel.deskripsi,
-//     );
-
-//     await piutangCollection
-//         .doc(piutangmodel.piutangId)
-//         .update(piutangModel.toMap());
-//   }
-
-//   Future<void> removePiutang(String piutangId) async {
-//     await piutangCollection.doc(piutangId).delete();
-//   }
-
-//   Future getPiutang() async {
-//     final piutang = await piutangCollection.get();
-//     streamController.sink.add(piutang.docs);
-//     return piutang.docs;
-//   }
-
-//   final StreamController<Barcode> _barcodeController =
-//       StreamController<Barcode>.broadcast();
-
-//   Stream<Barcode> get barcodeStream => _barcodeController.stream;
-
-//   QRViewController? controller;
-
-//   void startScanner() {
-//     _barcodeController.stream.listen((barcode) {
-//       // Handle barcode data here
-//     });
-//   }
-
-//   void onQRViewCreated(QRViewController controller) {
-//     this.controller = controller;
-//     controller.scannedDataStream.listen((scanData) {
-//       _barcodeController.add(scanData);
-//     });
-//   }
-
-//   // Method untuk menambah data piutang ke dalam piutangList
-//   void addPiutangQR(PiutangModel piutang) {
-//     if (!isPiutangExists(piutang)) {
-//       piutangList.add(piutang);
-//     }
-//   }
-
-//   // Method untuk mengecek apakah data piutang sudah ada
-//   bool isPiutangExists(PiutangModel piutang) {
-//     for (var existingPiutang in piutangList) {
-//       if (existingPiutang.namaPeminjam == piutang.namaPeminjam &&
-//           existingPiutang.noteleponPeminjam == piutang.noteleponPeminjam &&
-//           existingPiutang.nominalDiPinjam == piutang.nominalDiPinjam &&
-//           existingPiutang.tanggalDiPinjam == piutang.tanggalDiPinjam &&
-//           existingPiutang.tanggalJatuhTempo == piutang.tanggalJatuhTempo &&
-//           existingPiutang.deskripsi == piutang.deskripsi) {
-//         return true;
-//       }
-//     }
-//     return false;
-//   }
-
-//   void dispose() {
-//     streamController.close();
-//   }
-// }
-
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-import 'package:tugasakhir/model/bayarhutangmodel.dart';
-import 'package:tugasakhir/model/bayarpiutangmodel.dart';
-
+import 'package:tugasakhir/model/pembayaranmodel.dart';
 import 'package:tugasakhir/model/piutangmodel.dart';
 
 class PiutangController {
@@ -119,14 +11,16 @@ class PiutangController {
 
   final CollectionReference piutangCollection =
       FirebaseFirestore.instance.collection('piutang');
-  final CollectionReference bayarPiutangCollection =
-      FirebaseFirestore.instance.collection('bayarPiutang');
+  final CollectionReference pembayaranCollection =
+      FirebaseFirestore.instance.collection('pembayaran');
+  final CollectionReference hutangCollection =
+      FirebaseFirestore.instance.collection('hutang');
   final StreamController<List<DocumentSnapshot>> streamController =
       StreamController<List<DocumentSnapshot>>.broadcast();
 
   Stream<List<DocumentSnapshot>> get stream => streamController.stream;
 
-  Future<void> addPiutang(PiutangModel piutangmodel) async {
+  Future<void> addPiutangManual(PiutangModel piutangmodel) async {
     final User? user = _auth.currentUser;
     if (user != null) {
       final piutang = piutangmodel.toMap();
@@ -142,64 +36,119 @@ class PiutangController {
         tanggalDiPinjam: piutangmodel.tanggalDiPinjam,
         tanggalJatuhTempo: piutangmodel.tanggalJatuhTempo,
         deskripsi: piutangmodel.deskripsi,
+        totalBayar: '',
+        sisaHutang: '',
       );
 
       await docRef.update(updatedPiutangModel.toMap());
     }
   }
 
-  Future<void> addBayarPiutang(BayarPiutangModel bayarPiutangModel) async {
-    try {
-      String nominalDiPinjam =
-          await getNominalDiPinjam(bayarPiutangModel.piutangId);
-      String sisaPiutangStr = await calculateTotalSisaPiutang(
-          bayarPiutangModel.piutangId ?? '', nominalDiPinjam ?? '0');
-      double sisaPiutang = double.tryParse(
-              sisaPiutangStr.replaceAll('.', '').replaceAll(',', '')) ??
-          0.0;
-
-      double nominalBayar = double.tryParse(bayarPiutangModel.nominalBayar
-              .replaceAll('.', '')
-              .replaceAll(',', '')) ??
-          0.0;
-
-      if (nominalBayar > sisaPiutang) {
-        throw Exception('Nominal bayar tidak boleh melebihi sisa piutang');
-      }
-
-      final bayarPiutang = bayarPiutangModel.toMap();
-      bayarPiutang['userId'] =
-          _auth.currentUser!.uid; // Add user ID to the document
+  Future<void> addPiutang(PiutangModel piutangmodel) async {
+    final User? user = _auth.currentUser;
+    if (user != null) {
+      final piutang = piutangmodel.toMap();
+      piutang['userId'] = user.uid; // Add user ID to the document
       final DocumentReference docRef =
-          await bayarPiutangCollection.add(bayarPiutang);
-      final String docID = docRef.id;
+          piutangCollection.doc(piutangmodel.piutangId);
+      await docRef.set(piutang);
 
-      final BayarPiutangModel updatedBayarPiutangModel = BayarPiutangModel(
-        bayarPiutangId: docID,
-        piutangId: bayarPiutangModel.piutangId,
-        nominalBayar: bayarPiutangModel.nominalBayar,
-        tanggalBayar: bayarPiutangModel.tanggalBayar,
+      final PiutangModel updatedPiutangModel = PiutangModel(
+        piutangId: piutangmodel.piutangId,
+        namaPeminjam: piutangmodel.namaPeminjam,
+        noteleponPeminjam: piutangmodel.noteleponPeminjam,
+        nominalDiPinjam: piutangmodel.nominalDiPinjam,
+        tanggalDiPinjam: piutangmodel.tanggalDiPinjam,
+        tanggalJatuhTempo: piutangmodel.tanggalJatuhTempo,
+        deskripsi: piutangmodel.deskripsi,
+        totalBayar: piutangmodel.totalBayar,
+        sisaHutang: piutangmodel.sisaHutang,
       );
 
-      await docRef.update(updatedBayarPiutangModel.toMap());
-    } catch (e) {
-      print('Error adding bayar hutang: $e');
-      rethrow;
+      await docRef.update(updatedPiutangModel.toMap());
     }
   }
 
-  Future<List<BayarHutangModel>> getBayarHutangByHutangId(
+  // void listenToHutangChanges(String hutangId) {
+  //   final User? user = _auth.currentUser;
+  //   if (user != null) {
+  //     // Memonitor perubahan pada dokumen Hutang dengan ID tertentu
+  //     FirebaseFirestore.instance
+  //         .collection('hutang')
+  //         .doc(hutangId)
+  //         .snapshots()
+  //         .listen((snapshot) {
+  //       if (snapshot.exists) {
+  //         // Ambil data Hutang yang berubah
+  //         final hutangData = snapshot.data();
+
+  //         // Perbarui Piutang yang sesuai dengan Hutang ini
+  //         piutangCollection
+  //             .where('piutangId',
+  //                 isEqualTo:
+  //                     hutangData?['hutangId']) // Tambahkan pengecekan null (?)
+  //             .get()
+  //             .then((querySnapshot) {
+  //           if (querySnapshot.docs.isNotEmpty) {
+  //             querySnapshot.docs.forEach((doc) {
+  //               final updatedPiutang = PiutangModel(
+  //                 piutangId: doc['piutangId'],
+  //                 namaPeminjam: hutangData?['namaPemberiPinjam'],
+  //                 noteleponPeminjam: hutangData?['noteleponPemberiPinjam'],
+  //                 nominalDiPinjam: hutangData?['nominalPinjam'],
+  //                 tanggalDiPinjam: hutangData?['tanggalPinjam'],
+  //                 tanggalJatuhTempo: hutangData?['tanggalJatuhTempo'],
+  //                 deskripsi: hutangData?['deskripsi'],
+  //                 totalBayar: hutangData?['totalBayar'],
+  //                 sisaHutang: hutangData?['sisaHutang'],
+  //               );
+
+  //               // Update data Piutang di Firestore
+  //               doc.reference.update(updatedPiutang.toMap());
+  //             });
+  //           }
+  //         });
+  //       }
+  //     });
+  //   }
+  // }
+
+  // Future<List<BayarHutangModel>> getBayarHutangByHutangId(
+  //     String piutangId) async {
+  //   try {
+  //     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+  //         .collection('pembayaran')
+  //         .where('hutangId', isEqualTo: piutangId)
+  //         .get();
+
+  //     List<BayarHutangModel> bayarHutangList = querySnapshot.docs.map((doc) {
+  //       return BayarHutangModel(
+  //         bayarHutangId: doc.id,
+  //         hutangId: doc['piutangId'],
+  //         nominalBayar: doc['nominalBayar'],
+  //         tanggalBayar: doc['tanggalBayar'],
+  //       );
+  //     }).toList();
+
+  //     return bayarHutangList;
+  //   } catch (e) {
+  //     print('Error fetching BayarHutang data: $e');
+  //     throw Exception('Failed to get BayarHutang data');
+  //   }
+  // }
+
+  Future<List<PembayaranModel>> getBayarHutangByPiutangId(
       String piutangId) async {
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection('bayarHutang')
-          .where('hutangId', isEqualTo: piutangId)
+          .collection('pembayaran')
+          .where('piutangId', isEqualTo: piutangId)
           .get();
 
-      List<BayarHutangModel> bayarHutangList = querySnapshot.docs.map((doc) {
-        return BayarHutangModel(
-          bayarHutangId: doc.id,
-          hutangId: doc['piutangId'],
+      List<PembayaranModel> bayarHutangList = querySnapshot.docs.map((doc) {
+        return PembayaranModel(
+          pembayaranId: doc.id,
+          piutangId: doc['piutangId'],
           nominalBayar: doc['nominalBayar'],
           tanggalBayar: doc['tanggalBayar'],
         );
@@ -231,77 +180,57 @@ class PiutangController {
     }
   }
 
-  Future<List<DocumentSnapshot>> getPiutang() async {
+  // Future<List<DocumentSnapshot>> getPiutang() async {
+  //   final User? user = _auth.currentUser;
+  //   if (user != null) {
+  //     final piutang =
+  //         await piutangCollection.where('userId', isEqualTo: user.uid).get();
+  //     streamController.sink.add(piutang.docs);
+  //     return piutang.docs;
+  //   }
+  //   return [];
+  // }
+
+  // Future<List<DocumentSnapshot>> getPiutangSortedByDate() async {
+  //   final User? user = _auth.currentUser;
+  //   if (user != null) {
+  //     final piutang =
+  //         await piutangCollection.where('userId', isEqualTo: user.uid).get();
+  //     List<DocumentSnapshot> piutangDocs = piutang.docs;
+  //     streamController.sink.add(piutangDocs);
+  //     return piutangDocs;
+  //   }
+  //   return [];
+  // }
+
+  Future<List<DocumentSnapshot>> getPiutangSortedByDate(
+      {bool sortedByDate = false}) async {
     final User? user = _auth.currentUser;
     if (user != null) {
-      final piutang =
-          await piutangCollection.where('userId', isEqualTo: user.uid).get();
-      streamController.sink.add(piutang.docs);
-      return piutang.docs;
-    }
-    return [];
-  }
+      Query query = piutangCollection.where('userId', isEqualTo: user.uid);
 
-  Future<List<DocumentSnapshot>> getPiutangSortedByDate() async {
-    final User? user = _auth.currentUser;
-    if (user != null) {
-      final piutang =
-          await piutangCollection.where('userId', isEqualTo: user.uid).get();
-      List<DocumentSnapshot> piutangDocs = piutang.docs;
-      streamController.sink.add(piutangDocs);
-      return piutangDocs;
-    }
-    return [];
-  }
-
-  Future<List<DocumentSnapshot>> getPiutangHistorySortedByDate() async {
-    final User? user = _auth.currentUser;
-    if (user != null) {
-      final piutang =
-          await piutangCollection.where('userId', isEqualTo: user.uid).get();
-      List<DocumentSnapshot> piutangDocs = piutang.docs;
-      streamController.sink.add(piutangDocs);
-      return piutangDocs;
-    }
-    return [];
-  }
-
-  Stream<List<DocumentSnapshot>> piutangHistoryStream() {
-    return streamController.stream;
-  }
-
-  Future<String> getTotalPiutang() async {
-    final User? user = _auth.currentUser;
-    if (user != null) {
-      try {
-        final piutang =
-            await piutangCollection.where('userId', isEqualTo: user.uid).get();
-        double total = 0;
-        piutang.docs.forEach((doc) {
-          PiutangModel piutangModel =
-              PiutangModel.fromMap(doc.data() as Map<String, dynamic>);
-          double nominalDiPinjam =
-              double.tryParse(piutangModel.nominalDiPinjam) ?? 0;
-          total += nominalDiPinjam;
-        });
-        return total.toStringAsFixed(3);
-      } catch (e) {
-        print('Error while getting total piutang: $e');
-        return '0';
+      if (sortedByDate) {
+        query = query.orderBy(
+            'tanggalDiPinjam'); // Assuming 'tanggal' is the field name for date.
       }
+
+      final piutang = await query.get();
+      List<DocumentSnapshot> piutangDocs = piutang.docs;
+      streamController.sink.add(piutangDocs);
+      return piutangDocs;
     }
-    return '0';
+    return [];
   }
 
   Future<String> getTotalNominalBayar(String piutangId) async {
     try {
-      final bayarPiutang = await bayarPiutangCollection
+      final bayarPiutang = await pembayaranCollection
           .where('piutangId', isEqualTo: piutangId)
           .get();
       double totalBayar = 0;
       bayarPiutang.docs.forEach((doc) {
-        BayarPiutangModel bayarPiutangModel =
-            BayarPiutangModel.fromMap(doc.data() as Map<String, dynamic>);
+        PembayaranModel bayarPiutangModel =
+            PembayaranModel.fromMap(doc.data() as Map<String, dynamic>);
         totalBayar += double.parse(bayarPiutangModel.nominalBayar
                 .replaceAll('.', '')
                 .replaceAll(',', '')) ??
@@ -341,6 +270,59 @@ class PiutangController {
     }
   }
 
+  Future<void> addBayarPiutang(PembayaranModel bayarPiutangModel) async {
+    try {
+      String nominalDiPinjam =
+          await getNominalDiPinjam(bayarPiutangModel.piutangId!);
+      String sisaPiutangStr = await calculateTotalSisaPiutang(
+          bayarPiutangModel.piutangId ?? '', nominalDiPinjam ?? '0');
+      double sisaPiutang = double.tryParse(
+              sisaPiutangStr.replaceAll('.', '').replaceAll(',', '')) ??
+          0.0;
+
+      double nominalBayar = double.tryParse(bayarPiutangModel.nominalBayar
+              .replaceAll('.', '')
+              .replaceAll(',', '')) ??
+          0.0;
+
+      if (nominalBayar > sisaPiutang) {
+        throw Exception('Nominal bayar tidak boleh melebihi sisa piutang');
+      }
+
+      final bayarPiutang = bayarPiutangModel.toMap();
+      bayarPiutang['userId'] =
+          _auth.currentUser!.uid; // Add user ID to the document
+      final DocumentReference docRef =
+          await pembayaranCollection.add(bayarPiutang);
+      final String docID = docRef.id;
+
+      final PembayaranModel updatedBayarPiutangModel = PembayaranModel(
+        pembayaranId: docID,
+        piutangId: bayarPiutangModel.piutangId,
+        hutangId: bayarPiutangModel.piutangId,
+        nominalBayar: bayarPiutangModel.nominalBayar,
+        tanggalBayar: bayarPiutangModel.tanggalBayar,
+      );
+
+      await docRef.update(updatedBayarPiutangModel.toMap());
+      // Recalculate totalBayar and sisaPiutang
+      String totalBayarStr =
+          await getTotalNominalBayar(bayarPiutangModel.piutangId!);
+      String nominalPinjam2 =
+          await getNominalDiPinjam(bayarPiutangModel.piutangId!);
+      String updatedSisaPiutangStr = await calculateTotalSisaPiutang(
+          bayarPiutangModel.piutangId!, nominalPinjam2);
+
+      await piutangCollection.doc(bayarPiutangModel.piutangId).update({
+        'totalBayar': totalBayarStr,
+        'sisaHutang': updatedSisaPiutangStr,
+      });
+    } catch (e) {
+      print('Error adding bayar piutang: $e');
+      rethrow;
+    }
+  }
+
   Future<PiutangModel> getPiutangById(String piutangId) async {
     final doc = await piutangCollection.doc(piutangId).get();
     if (doc.exists) {
@@ -348,10 +330,6 @@ class PiutangController {
     } else {
       throw Exception('Piutang not found');
     }
-  }
-
-  Future<void> removePiutang(String piutangId) async {
-    await piutangCollection.doc(piutangId).delete();
   }
 
   Future<String> getTotalSisaPiutang() async {
@@ -383,42 +361,107 @@ class PiutangController {
     return '0';
   }
 
-  Future<void> updatePiutang(PiutangModel piutangmodel) async {
-    final PiutangModel piutangModel = PiutangModel(
-      piutangId: piutangmodel.piutangId,
-      namaPeminjam: piutangmodel.namaPeminjam,
-      noteleponPeminjam: piutangmodel.noteleponPeminjam,
-      nominalDiPinjam: piutangmodel.nominalDiPinjam,
-      tanggalDiPinjam: piutangmodel.tanggalDiPinjam,
-      tanggalJatuhTempo: piutangmodel.tanggalJatuhTempo,
-      deskripsi: piutangmodel.deskripsi,
-    );
+  // Future<void> movePiutangToHistory(String piutangId) async {
+  //   try {
+  //     final DocumentSnapshot snapshot =
+  //         await piutangCollection.doc(piutangId).get();
+  //     if (snapshot.exists) {
+  //       final data = snapshot.data() as Map<String, dynamic>?;
+  //       if (data != null) {
+  //         data['userId'] =
+  //             _auth.currentUser!.uid; // Add user ID to the document
+  //         await _firestore.collection('history').doc(piutangId).set(data);
+  //         await piutangCollection.doc(piutangId).delete();
+  //       }
+  //     } else {
+  //       throw Exception('Hutang with id $piutangId does not exist');
+  //     }
+  //   } catch (e) {
+  //     print('Error moving hutang to history: $e');
+  //     rethrow;
+  //   }
+  // }
 
-    await piutangCollection
-        .doc(piutangmodel.piutangId)
-        .update(piutangModel.toMap());
+  Future<void> removePiutang(String piutangId) async {
+    await piutangCollection.doc(piutangId).delete();
+  }
+
+  Stream<List<DocumentSnapshot>> piutangHistoryStream() {
+    return _firestore
+        .collection('history')
+        .orderBy('tanggalDiPinjam')
+        .snapshots()
+        .map((querySnapshot) => querySnapshot.docs);
   }
 
   Future<void> movePiutangToHistory(String piutangId) async {
     try {
-      final DocumentSnapshot snapshot =
-          await piutangCollection.doc(piutangId).get();
-      if (snapshot.exists) {
-        final data = snapshot.data() as Map<String, dynamic>?;
-        if (data != null) {
-          data['userId'] =
-              _auth.currentUser!.uid; // Add user ID to the document
-          await _firestore.collection('history').doc(piutangId).set(data);
-          await piutangCollection.doc(piutangId).delete();
-        }
-      } else {
-        throw Exception('Hutang with id $piutangId does not exist');
+      DocumentSnapshot piutangSnapshot =
+          await _firestore.collection('piutang').doc(piutangId).get();
+      if (piutangSnapshot.exists) {
+        Map<String, dynamic> piutangData =
+            piutangSnapshot.data() as Map<String, dynamic>;
+
+        // Move data to history collection
+        await _firestore.collection('history').doc(piutangId).set(piutangData);
+
+        // Delete from hutang collection
+        await _firestore.collection('piutang').doc(piutangId).delete();
       }
     } catch (e) {
       print('Error moving hutang to history: $e');
-      rethrow;
     }
   }
+
+  Future<List<Map<String, dynamic>>> getHistorySortedByDate() async {
+    try {
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('history')
+          .orderBy('tanggalDiPinjam')
+          .get();
+      return querySnapshot.docs
+          .map((doc) => doc.data() as Map<String, dynamic>)
+          .toList();
+    } catch (e) {
+      print('Error fetching history sorted by date: $e');
+      return [];
+    }
+  }
+
+  // Future<List<DocumentSnapshot>> getPiutangHistorySortedByDate() async {
+  //   final User? user = _auth.currentUser;
+  //   if (user != null) {
+  //     final piutang =
+  //         await piutangCollection.where('userId', isEqualTo: user.uid).get();
+  //     List<DocumentSnapshot> piutangDocs = piutang.docs;
+  //     streamController.sink.add(piutangDocs);
+  //     return piutangDocs;
+  //   }
+  //   return [];
+  // }
+
+  // Future<String> getTotalPiutang() async {
+  //   final User? user = _auth.currentUser;
+  //   if (user != null) {
+  //     try {
+  //       final piutang =
+  //           await piutangCollection.where('userId', isEqualTo: user.uid).get();
+  //       double total = 0;
+  //       piutang.docs.forEach((doc) {
+  //         PiutangModel piutangModel =
+  //             PiutangModel.fromMap(doc.data() as Map<String, dynamic>);
+  //         double nominalDiPinjam =
+  //             double.tryParse(piutangModel.nominalDiPinjam!) ?? 0;
+  //         total += nominalDiPinjam;
+  //       });
+  //       return total.toStringAsFixed(3);
+  //     } catch (e) {
+  //       print('Error while getting total piutang: $e');
+  //       return '0';
+  //     }
+  //   }
+  //   return '0';
+  // }
 
   // Future<void> updatePiutangWithPayments(
   //     String piutangId, double totalBayar, double sisaPiutang) async {

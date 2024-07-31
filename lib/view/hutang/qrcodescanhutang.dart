@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:tugasakhir/controller/hutangcontroller.dart';
 import 'package:tugasakhir/model/hutangmodel.dart';
-import 'package:tugasakhir/view/hutang.dart';
+import 'package:tugasakhir/view/hutang/hutang.dart';
 
 class QRCodeScanHutang extends StatefulWidget {
   @override
@@ -91,6 +91,10 @@ class _QRCodeScanHutangState extends State<QRCodeScanHutang> {
                 'Tanggal Jatuh Tempo: ${data['piutang']['tanggalJatuhTempo'] ?? 'Data tidak tersedia'}'),
             Text(
                 'Deskripsi: ${data['piutang']['deskripsi'] ?? 'Data tidak tersedia'}'),
+            Text(
+                'Total Bayar: ${data['piutang']['totalBayar'] ?? 'Data tidak tersedia'}'),
+            Text(
+                'Sisa Hutang: ${data['piutang']['sisaHutang'] ?? 'Data tidak tersedia'}'),
           ],
         ),
       ),
@@ -100,7 +104,7 @@ class _QRCodeScanHutangState extends State<QRCodeScanHutang> {
             Navigator.of(context).pop();
             _handleConvertAndSaveHutangData(data);
           },
-          child: const Text('Konversi dan Simpan Data'),
+          child: const Text('Simpan Data'),
         ),
         TextButton(
           onPressed: () {
@@ -137,6 +141,8 @@ class _QRCodeScanHutangState extends State<QRCodeScanHutang> {
         tanggalPinjam: data['piutang']['tanggalDiPinjam'] ?? '',
         tanggalJatuhTempo: data['piutang']['tanggalJatuhTempo'] ?? '',
         deskripsi: data['piutang']['deskripsi'] ?? '',
+        totalBayar: data['piutang']['totalBayar'] ?? '',
+        sisaHutang: data['piutang']['sisaHutang'] ?? '',
       );
 
       _hutangController.addHutang(hutangModel).then((_) {

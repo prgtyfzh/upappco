@@ -21,7 +21,7 @@ class _CreatePiutangState extends State<CreatePiutang> {
   String? nominalDiPinjam;
   String? tanggalDiPinjam;
   String? tanggalJatuhTempo;
-  String? deskripsi;
+  String? deskripsi = '';
 
   TextEditingController nominalController = TextEditingController();
   final TextEditingController _tanggalDiPinjamController =
@@ -29,17 +29,11 @@ class _CreatePiutangState extends State<CreatePiutang> {
   final TextEditingController _tanggalJatuhTempoController =
       TextEditingController();
 
-  // final _picker = ImagePicker();
-
-  // Future<void> _pickImage() async {
-  //   final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-
-  //   if (pickedFile != null) {
-  //     setState(() {
-  //       _selectedFile = File(pickedFile.path);
-  //     });
-  //   }
-  // }
+  @override
+  void dispose() {
+    nominalController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -394,14 +388,6 @@ class _CreatePiutangState extends State<CreatePiutang> {
                             filled: true,
                             fillColor: Colors.white,
                           ),
-                          validator: (value) {
-                            if (value != null &&
-                                value.isNotEmpty &&
-                                value.length < 10) {
-                              return 'Deskripsi harus memiliki minimal 10 karakter jika diisi!';
-                            }
-                            return null;
-                          },
                           onChanged: (value) {
                             setState(() {
                               deskripsi = value;
@@ -409,7 +395,7 @@ class _CreatePiutangState extends State<CreatePiutang> {
                           },
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 40),
                       ElevatedButton(
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
@@ -419,22 +405,23 @@ class _CreatePiutangState extends State<CreatePiutang> {
                               nominalDiPinjam: nominalDiPinjam!,
                               tanggalDiPinjam: tanggalDiPinjam!,
                               tanggalJatuhTempo: tanggalJatuhTempo!,
-                              deskripsi: deskripsi!,
+                              deskripsi: deskripsi ?? '',
                             );
-                            piutangController.addPiutang(piutangmodel);
+                            piutangController.addPiutangManual(piutangmodel);
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                   content: Text('Data berhasil ditambahkan')),
                             );
                             Navigator.pop(context, true);
+                            setState(() {});
                           }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFB18154),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          minimumSize: const Size(150, 50),
+                          minimumSize: const Size(295, 50),
                         ),
                         child: const Text(
                           'Simpan',

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tugasakhir/controller/authcontroller.dart';
-import 'package:tugasakhir/loginpage.dart';
 import 'package:tugasakhir/model/usermodel.dart';
+import 'package:tugasakhir/view/loginpage.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -11,16 +11,18 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final _formKey = GlobalKey<FormState>();
-  final authController = AuthController();
-  final _passwordController = TextEditingController();
-  bool isPasswordVisible = false;
-  bool isConfirmPasswordVisible = false;
+  final _formKey = GlobalKey<FormState>(); // Kunci form untuk validasi
+  final authController = AuthController(); // Inisialisasi AuthController
+  final _passwordController =
+      TextEditingController(); // Kontroler untuk password field
+  bool isPasswordVisible = false; // Menyimpan status visibilitas password
+  bool isConfirmPasswordVisible =
+      false; // Menyimpan status visibilitas konfirmasi password
 
-  String? name;
-  String? email;
-  String? password;
-  String? confirmPassword;
+  String? name; // Menyimpan nilai nama
+  String? email; // Menyimpan nilai email
+  String? password; // Menyimpan nilai password
+  String? confirmPassword; // Menyimpan nilai konfirmasi password
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +31,9 @@ class _RegisterPageState extends State<RegisterPage> {
         child: SingleChildScrollView(
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context).size.height,
+              minHeight: MediaQuery.of(context)
+                  .size
+                  .height, // Mengatur tinggi minimum agar scroll view mengisi layar
             ),
             child: Padding(
               padding: const EdgeInsets.all(10),
@@ -42,22 +46,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       margin: const EdgeInsets.only(bottom: 20),
                       child: Image.asset(
                         'assets/image/logoupapp.png',
-                        height: 200,
+                        height: 200, // Menampilkan gambar logo aplikasi
                       ),
                     ),
-                    // Container(
-                    //   margin: const EdgeInsets.only(
-                    //     right: 250,
-                    //   ),
-                    //   child: const Text(
-                    //     'Nama',
-                    //     style: TextStyle(
-                    //       color: Colors.black,
-                    //       fontWeight: FontWeight.bold,
-                    //       fontSize: 16,
-                    //     ),
-                    //   ),
-                    // ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 50),
                       child: TextFormField(
@@ -70,34 +61,20 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Nama tidak boleh kosong';
+                            return 'Nama tidak boleh kosong'; // Validasi nama kosong
                           }
                           if (value.length > 30) {
-                            return 'Nama tidak boleh lebih dari 30 karakter';
+                            return 'Nama tidak boleh lebih dari 30 karakter'; // Validasi panjang nama
                           }
                           return null;
                         },
                         onChanged: (value) {
                           setState(() {
-                            name = value;
+                            name = value; // Menyimpan nilai nama
                           });
                         },
                       ),
                     ),
-
-                    // Container(
-                    //   margin: const EdgeInsets.only(
-                    //     right: 250,
-                    //   ),
-                    //   child: const Text(
-                    //     'Email',
-                    //     style: TextStyle(
-                    //       color: Colors.black,
-                    //       fontWeight: FontWeight.bold,
-                    //       fontSize: 16,
-                    //     ),
-                    //   ),
-                    // ),
                     const SizedBox(height: 20),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 50),
@@ -111,40 +88,26 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Email tidak boleh kosong';
+                            return 'Email tidak boleh kosong'; // Validasi email kosong
                           } else if (!value.contains('@')) {
-                            return 'Masukkan email yang benar';
+                            return 'Masukkan email yang benar'; // Validasi format email
                           }
                           return null;
                         },
                         onChanged: (value) {
                           setState(() {
-                            email = value;
+                            email = value; // Menyimpan nilai email
                           });
                         },
                       ),
                     ),
-
-                    // Container(
-                    //   margin: const EdgeInsets.only(
-                    //     right: 210,
-                    //   ),
-                    //   child: const Text(
-                    //     'Kata Sandi',
-                    //     style: TextStyle(
-                    //       color: Colors.black,
-                    //       fontWeight: FontWeight.bold,
-                    //       fontSize: 16,
-                    //     ),
-                    //   ),
-                    // ),
-
                     const SizedBox(height: 20),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 50),
                       child: TextFormField(
                         controller: _passwordController,
-                        obscureText: !isPasswordVisible,
+                        obscureText:
+                            !isPasswordVisible, // Atur visibilitas password
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10.0),
@@ -159,44 +122,33 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                             onPressed: () {
                               setState(() {
-                                isPasswordVisible = !isPasswordVisible;
+                                isPasswordVisible =
+                                    !isPasswordVisible; // Toggle visibilitas password
                               });
                             },
                           ),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Kata sandi tidak boleh kosong';
+                            return 'Kata sandi tidak boleh kosong'; // Validasi password kosong
                           } else if (value.length < 6) {
-                            return 'Kata sandi harus berisi minimal 6 karakter';
+                            return 'Kata sandi harus berisi minimal 6 karakter'; // Validasi panjang password
                           }
                           return null;
                         },
                         onChanged: (value) {
                           setState(() {
-                            password = value;
+                            password = value; // Menyimpan nilai password
                           });
                         },
                       ),
                     ),
                     const SizedBox(height: 20),
-                    // Container(
-                    //   margin: const EdgeInsets.only(
-                    //     right: 125,
-                    //   ),
-                    //   child: const Text(
-                    //     'Konfirmasi Kata Sandi',
-                    //     style: TextStyle(
-                    //       color: Colors.black,
-                    //       fontWeight: FontWeight.bold,
-                    //       fontSize: 16,
-                    //     ),
-                    //   ),
-                    // ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 50),
                       child: TextFormField(
-                        obscureText: !isConfirmPasswordVisible,
+                        obscureText:
+                            !isConfirmPasswordVisible, // Atur visibilitas konfirmasi password
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10.0),
@@ -212,23 +164,24 @@ class _RegisterPageState extends State<RegisterPage> {
                             onPressed: () {
                               setState(() {
                                 isConfirmPasswordVisible =
-                                    !isConfirmPasswordVisible;
+                                    !isConfirmPasswordVisible; // Toggle visibilitas konfirmasi password
                               });
                             },
                           ),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Kata sandi tidak boleh kosong';
+                            return 'Kata sandi tidak boleh kosong'; // Validasi konfirmasi password kosong
                           }
                           if (value != _passwordController.text) {
-                            return 'Kata sandi harus sama';
+                            return 'Kata sandi harus sama'; // Validasi kesesuaian password
                           }
                           return null;
                         },
                         onChanged: (value) {
                           setState(() {
-                            confirmPassword = value;
+                            confirmPassword =
+                                value; // Menyimpan nilai konfirmasi password
                           });
                         },
                       ),
@@ -243,84 +196,25 @@ class _RegisterPageState extends State<RegisterPage> {
                                 password != null) {
                               UserModel? registeredUser = await authController
                                   .registerWithEmailAndPassword(
-                                      email!, password!, name!);
-                              if (registeredUser != null) {
-                                // Registration successful
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return Theme(
-                                      data: ThemeData(
-                                        // Customize the color of the dialog background
-                                        dialogBackgroundColor:
-                                            const Color(0xFFD9D9D9),
-                                      ),
-                                      child: AlertDialog(
-                                        title: const Text(
-                                            'Registration Successful'),
-                                        content: const Text(
-                                            'You have been successfully registered.'),
-                                        actions: <Widget>[
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.push(context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) {
-                                                return const LoginPage();
-                                              }));
-                                              // Navigate to the next screen or perform any desired action
-                                            },
-                                            child: const Text('OK'),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                );
-                              }
-                            } else {
-                              // Registration failed
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return Theme(
-                                    data: ThemeData(
-                                      // Customize the color of the dialog background
-                                      dialogBackgroundColor:
-                                          const Color(0xFFD9D9D9),
-                                    ),
-                                    child: AlertDialog(
-                                      title: const Text('Registration Failed'),
-                                      content: const Text(
-                                          'An error occurred during registration.'),
-                                      actions: <Widget>[
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: const Text('OK'),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              );
+                                      email!, password!, name!, context);
                             }
                           }
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF24675B),
+                        backgroundColor:
+                            const Color(0xFF24675B), // Warna tombol
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
+                          borderRadius:
+                              BorderRadius.circular(18), // Bentuk tombol
                         ),
-                        minimumSize: const Size(280, 50),
+                        minimumSize: const Size(280, 50), // Ukuran tombol
                       ),
                       child: const Text(
                         'Daftar',
                         style: TextStyle(
                           fontSize: 18,
-                          color: Colors.white,
+                          color: Colors.white, // Warna teks tombol
                         ),
                       ),
                     ),
@@ -333,7 +227,8 @@ class _RegisterPageState extends State<RegisterPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const LoginPage(),
+                                builder: (context) =>
+                                    const LoginPage(), // Navigasi ke halaman login
                               ),
                             );
                           },
@@ -341,7 +236,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             'Masuk',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFFB18154),
+                              color: Color(0xFFB18154), // Warna teks tombol
                             ),
                           ),
                         ),

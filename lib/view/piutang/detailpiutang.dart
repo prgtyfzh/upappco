@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tugasakhir/controller/piutangcontroller.dart';
-import 'package:tugasakhir/view/piutang/formbayarpiutang.dart';
+import 'package:tugasakhir/view/formbayar.dart';
 
 class DetailPiutang extends StatefulWidget {
   final String namaPeminjam;
@@ -12,6 +12,7 @@ class DetailPiutang extends StatefulWidget {
   final String tanggalJatuhTempo;
   final String deskripsi;
   final String piutangId;
+  final bool fromRiwayat;
 
   const DetailPiutang({
     Key? key,
@@ -22,6 +23,7 @@ class DetailPiutang extends StatefulWidget {
     required this.tanggalJatuhTempo,
     required this.deskripsi,
     required this.piutangId,
+    this.fromRiwayat = false,
   }) : super(key: key);
 
   @override
@@ -225,7 +227,7 @@ class _DetailPiutangState extends State<DetailPiutang> {
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
-                    .collection('bayarPiutang')
+                    .collection('pembayaran')
                     .where('piutangId', isEqualTo: widget.piutangId)
                     .snapshots(),
                 builder: (context, snapshot) {
@@ -274,47 +276,48 @@ class _DetailPiutangState extends State<DetailPiutang> {
               ),
             ),
             const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => FormBayarPiutang(
-                              piutangId: widget.piutangId,
-                              sisaPiutang: _sisaPiutang.toString(),
+            if (!widget.fromRiwayat)
+              Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FormBayar(
+                                piutangId: widget.piutangId,
+                                sisaHutang: _sisaPiutang.toString(),
+                              ),
                             ),
+                          ).then((_) {
+                            // Refresh data when coming back from FormBayar
+                            _loadData();
+                          });
+                        },
+                        style: TextButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                        ).then((_) {
-                          // Refresh data when coming back from FormBayar
-                          _loadData();
-                        });
-                      },
-                      style: TextButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          backgroundColor: const Color(0xFF24675B),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        backgroundColor: const Color(0xFF24675B),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: const Text(
-                        'Terima Pembayaran',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                        child: const Text(
+                          'Terima Pembayaran',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

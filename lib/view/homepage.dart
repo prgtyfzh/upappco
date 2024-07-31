@@ -4,8 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tugasakhir/controller/hutangcontroller.dart';
 import 'package:tugasakhir/controller/piutangcontroller.dart';
-import 'package:tugasakhir/view/hutang.dart';
-import 'package:tugasakhir/view/piutang.dart';
+import 'package:tugasakhir/view/hutang/hutang.dart';
+import 'package:tugasakhir/view/piutang/piutang.dart';
 import 'package:tugasakhir/view/riwayat.dart';
 import 'package:tugasakhir/view/settings.dart';
 
@@ -262,7 +262,7 @@ class _HomePageState extends State<HomePage> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const Hutang()),
+                    MaterialPageRoute(builder: (context) => Hutang()),
                   ).then((value) => _updateDataOnReturn());
                 },
               ),

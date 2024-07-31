@@ -21,15 +21,13 @@ class _CreateHutangState extends State<CreateHutang> {
   String? nominalPinjam;
   String? tanggalPinjam;
   String? tanggalJatuhTempo;
-  String? deskripsi;
+  String? deskripsi = "";
 
   TextEditingController nominalController = TextEditingController();
   final TextEditingController _tanggalPinjamController =
       TextEditingController();
   final TextEditingController _tanggalJatuhTempoController =
       TextEditingController();
-
-  // }
 
   @override
   void dispose() {
@@ -391,14 +389,6 @@ class _CreateHutangState extends State<CreateHutang> {
                             filled: true,
                             fillColor: Colors.white,
                           ),
-                          validator: (value) {
-                            if (value != null &&
-                                value.isNotEmpty &&
-                                value.length < 10) {
-                              return 'Deskripsi harus memiliki minimal 10 karakter jika diisi!';
-                            }
-                            return null;
-                          },
                           onChanged: (value) {
                             setState(() {
                               deskripsi = value;
@@ -416,22 +406,23 @@ class _CreateHutangState extends State<CreateHutang> {
                               nominalPinjam: nominalPinjam!,
                               tanggalPinjam: tanggalPinjam!,
                               tanggalJatuhTempo: tanggalJatuhTempo!,
-                              deskripsi: deskripsi!,
+                              deskripsi: deskripsi ?? '',
                             );
-                            hutangController.addHutang(hutangmodel);
+                            hutangController.addHutangManual(hutangmodel);
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                   content: Text('Data berhasil ditambahkan')),
                             );
                             Navigator.pop(context, true);
+                            setState(() {});
                           }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFB18154),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          minimumSize: const Size(150, 50),
+                          minimumSize: const Size(295, 50),
                         ),
                         child: const Text(
                           'Simpan',

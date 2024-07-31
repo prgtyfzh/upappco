@@ -1,7 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:tugasakhir/registerpage.dart';
-import 'package:tugasakhir/view/homepage.dart';
+import 'package:tugasakhir/controller/authcontroller.dart';
+import 'package:tugasakhir/view/registerpage.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -11,7 +10,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final AuthController _authController = AuthController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? email;
   String? password;
@@ -39,19 +38,6 @@ class _LoginPageState extends State<LoginPage> {
                       height: 200,
                     ),
                   ),
-                  // Container(
-                  //   margin: const EdgeInsets.only(
-                  //     right: 250,
-                  //   ),
-                  //   child: const Text(
-                  //     'Email',
-                  //     style: TextStyle(
-                  //       color: Colors.black,
-                  //       fontWeight: FontWeight.bold,
-                  //       fontSize: 16,
-                  //     ),
-                  //   ),
-                  // ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 50),
                     child: TextFormField(
@@ -59,9 +45,8 @@ class _LoginPageState extends State<LoginPage> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10.0),
                         ),
-                        prefixIcon: Icon(Icons.email),
+                        prefixIcon: const Icon(Icons.email),
                         hintText: 'Masukkan email',
-                        hintStyle: TextStyle(),
                       ),
                       onChanged: (value) {
                         setState(() {
@@ -79,19 +64,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Container(
-                  //   margin: const EdgeInsets.only(
-                  //     right: 210,
-                  //   ),
-                  //   child: const Text(
-                  //     'Kata Sandi',
-                  //     style: TextStyle(
-                  //       color: Colors.black,
-                  //       fontWeight: FontWeight.bold,
-                  //       fontSize: 16,
-                  //     ),
-                  //   ),
-                  // ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 50),
                     child: TextFormField(
@@ -102,7 +74,6 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         prefixIcon: const Icon(Icons.lock),
                         hintText: 'Masukkan kata sandi',
-                        hintStyle: const TextStyle(),
                         suffixIcon: IconButton(
                           icon: Icon(
                             isPasswordVisible
@@ -133,40 +104,8 @@ class _LoginPageState extends State<LoginPage> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        try {
-                          final UserCredential userCredential =
-                              await _auth.signInWithEmailAndPassword(
-                                  email: email!, password: password!);
-                          if (userCredential.user != null) {
-                            // Login berhasil
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const HomePage(),
-                              ),
-                            );
-                          }
-                        } catch (e) {
-                          // Login gagal
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: const Text('Gagal Masuk'),
-                                content:
-                                    const Text('Email atau kata sandi salah.'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text('OK'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        }
+                        await _authController.signInWithEmailAndPassword(
+                            email!, password!, context);
                       }
                     },
                     style: ElevatedButton.styleFrom(

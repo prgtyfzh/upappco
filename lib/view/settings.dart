@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:tugasakhir/loginpage.dart';
+import 'package:tugasakhir/view/loginpage.dart';
 import 'package:tugasakhir/model/usermodel.dart';
-import 'package:tugasakhir/view/profil/updateakun.dart';
 
 class Pengaturan extends StatefulWidget {
   const Pengaturan({Key? key}) : super(key: key);
@@ -69,8 +68,6 @@ class _PengaturanState extends State<Pengaturan> {
                 const SizedBox(height: 20),
                 _buildProfileSection(userData),
                 const SizedBox(height: 20),
-                _buildEditAccountSection(context),
-                const SizedBox(height: 20),
                 _buildLogoutButton(context),
                 const SizedBox(height: 20),
               ],
@@ -84,7 +81,7 @@ class _PengaturanState extends State<Pengaturan> {
   Widget _buildProfileSection(UserModel userData) {
     return ListTile(
       leading: const CircleAvatar(
-        backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+        backgroundImage: AssetImage('assets/image/logoupapp.png'),
         radius: 40,
       ),
       title: Text(
@@ -100,26 +97,6 @@ class _PengaturanState extends State<Pengaturan> {
           fontSize: 16,
         ),
       ),
-    );
-  }
-
-  Widget _buildEditAccountSection(BuildContext context) {
-    return ListTile(
-      leading: const Icon(Icons.edit),
-      title: const Text('Edit Akun'),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const UpdateAccount(),
-          ),
-        ).then((_) {
-          // Refresh the user data when returning from UpdateAccount page
-          setState(() {
-            _userDataFuture = _getUserData();
-          });
-        });
-      },
     );
   }
 
