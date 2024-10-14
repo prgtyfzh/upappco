@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,7 +7,7 @@ import 'package:tugasakhir/controller/hutangcontroller.dart';
 
 class DetailHutang extends StatefulWidget {
   final String namaPemberiPinjam;
-  final String noteleponPemberiPinjam;
+
   final String nominalPinjam;
   final String tanggalPinjam;
   final String tanggalJatuhTempo;
@@ -17,7 +18,6 @@ class DetailHutang extends StatefulWidget {
   const DetailHutang({
     Key? key,
     required this.namaPemberiPinjam,
-    required this.noteleponPemberiPinjam,
     required this.nominalPinjam,
     required this.tanggalPinjam,
     required this.tanggalJatuhTempo,
@@ -32,6 +32,8 @@ class DetailHutang extends StatefulWidget {
 
 class _DetailHutangState extends State<DetailHutang> {
   final HutangController _hutangController = HutangController();
+
+  String userName = 'Loading...';
   String _sisaHutang = '0';
   String _totalBayar = '0';
   double _progress = 0.0;
@@ -39,6 +41,7 @@ class _DetailHutangState extends State<DetailHutang> {
   @override
   void initState() {
     super.initState();
+    setState(() {});
     _loadData();
   }
 
@@ -79,6 +82,15 @@ class _DetailHutangState extends State<DetailHutang> {
     });
   }
 
+  Future<String> _fetchUsername(String userId) async {
+    if (userId.isEmpty) return 'N/A'; // Handle empty userId
+
+    DocumentSnapshot userDoc =
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
+
+    return userDoc['uName'] ?? 'N/A';
+  }
+
   @override
   void dispose() {
     _hutangController.dispose();
@@ -116,24 +128,6 @@ class _DetailHutangState extends State<DetailHutang> {
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 20),
-                    ),
-                    const SizedBox(height: 5),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.phone,
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          widget.noteleponPemberiPinjam,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
                     ),
                     const SizedBox(height: 5),
                     Row(
@@ -256,19 +250,41 @@ class _DetailHutangState extends State<DetailHutang> {
                           documents[index].data() as Map<String, dynamic>;
                       final nominalBayar = data['nominalBayar'] ?? 0;
                       final tanggalBayar = data['tanggalBayar'] ?? 'N/A';
+                      final userId = data['userId'];
 
-                      return Card(
-                        margin: const EdgeInsets.symmetric(vertical: 5),
-                        child: ListTile(
-                          title: Text(
-                              'Nominal Bayar: Rp${nominalBayar.toString()}'),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Tanggal Bayar: ${tanggalBayar.toString()}'),
-                            ],
-                          ),
-                        ),
+                      return FutureBuilder<String>(
+                        future: _fetchUsername(userId),
+                        builder: (context, usernameSnapshot) {
+                          String username = 'Loading...';
+                          if (usernameSnapshot.connectionState ==
+                              ConnectionState.done) {
+                            if (usernameSnapshot.hasError) {
+                              username = 'Error fetching username';
+                            } else {
+                              username = usernameSnapshot.data ?? 'N/A';
+                            }
+                          }
+
+                          return Card(
+                            margin: const EdgeInsets.symmetric(vertical: 5),
+                            child: ListTile(
+                              title: Text(
+                                'Nominal Bayar: Rp${nominalBayar.toString()}',
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Tanggal Bayar: ${tanggalBayar.toString()}',
+                                  ),
+                                  Text(
+                                    'Penginput: $username', // Menampilkan username
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       );
                     },
                   );

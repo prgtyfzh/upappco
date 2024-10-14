@@ -180,16 +180,26 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Widget untuk menampilkan kartu Hutang atau Piutang
-  Widget _buildHutangPiutangCard(
-      {required String title, required String amount}) {
+  Widget _buildHutangPiutangCard({
+    required String title,
+    required String amount,
+  }) {
+    Color titleColor;
+    if (title == 'Hutang') {
+      titleColor = const Color(0xFF24675B);
+    } else if (title == 'Piutang') {
+      titleColor = const Color(0xFFB18154);
+    } else {
+      titleColor = Colors.black; // Fallback color if needed
+    }
     return Container(
       margin: const EdgeInsets.all(5.0),
       padding: const EdgeInsets.all(10.0),
       width: 330,
       height: 150,
-      decoration: const BoxDecoration(
-        color: Color(0xFFB18154), // Set background color to white
-        borderRadius: BorderRadius.only(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20.0),
           topRight: Radius.circular(20.0),
           bottomLeft: Radius.circular(20.0),
@@ -204,19 +214,19 @@ class _HomePageState extends State<HomePage> {
             children: [
               Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 20,
+                style: TextStyle(
+                  fontSize: 25,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: titleColor,
                 ),
               ),
               const SizedBox(height: 20),
               Text(
                 amount,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 35,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: titleColor,
                 ),
               ),
             ],
@@ -262,7 +272,7 @@ class _HomePageState extends State<HomePage> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => Hutang()),
+                    MaterialPageRoute(builder: (context) => const Hutang()),
                   ).then((value) => _updateDataOnReturn());
                 },
               ),

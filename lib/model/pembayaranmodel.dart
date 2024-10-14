@@ -6,12 +6,14 @@ class PembayaranModel {
   String? pembayaranId;
   String? hutangId;
   String? piutangId;
+  String? uId;
   final String nominalBayar;
   final String tanggalBayar;
   PembayaranModel({
     this.pembayaranId,
     this.hutangId,
     this.piutangId,
+    this.uId,
     required this.nominalBayar,
     required this.tanggalBayar,
   });

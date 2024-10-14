@@ -17,7 +17,7 @@ class _CreateHutangState extends State<CreateHutang> {
   final hutangController = HutangController();
 
   String? namaPemberiPinjam;
-  String? noteleponPemberiPinjam;
+
   String? nominalPinjam;
   String? tanggalPinjam;
   String? tanggalJatuhTempo;
@@ -104,62 +104,10 @@ class _CreateHutangState extends State<CreateHutang> {
                             }
                             return null;
                           },
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
                           onChanged: (value) {
                             setState(() {
                               namaPemberiPinjam = value;
-                            });
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 10.0,
-                          horizontal: 30.0,
-                        ),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'No. Telepon',
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.start,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        width: 300,
-                        child: TextFormField(
-                          decoration: InputDecoration(
-                            hintText: 'Masukkan nomor telepon',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            filled: true,
-                            fillColor: Colors.white,
-                          ),
-                          keyboardType: TextInputType
-                              .number, // Set the keyboard type to number
-                          inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter
-                                .digitsOnly // Allow only digits
-                          ],
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Nomor telepon tidak boleh kosong!';
-                            } else if (value.length < 10 || value.length > 13) {
-                              return 'Nomor telepon harus memiliki panjang 10-13 karakter!';
-                            } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-                              return 'Nomor telepon hanya boleh berisi angka.';
-                            }
-                            return null;
-                          },
-                          onChanged: (value) {
-                            setState(() {
-                              noteleponPemberiPinjam = value;
                             });
                           },
                         ),
@@ -205,12 +153,21 @@ class _CreateHutangState extends State<CreateHutang> {
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Nominal tidak boleh kosong!';
-                            } else if (!RegExp(r'^\d{1,3}(.\d{3})*(\.\d+)?$')
-                                .hasMatch(value)) {
-                              return 'Nominal harus berisi angka saja.';
                             }
+
+                            final parsedValue =
+                                int.tryParse(value.replaceAll('.', ''));
+
+                            if (parsedValue == null) {
+                              return 'Nominal harus berisi angka saja.';
+                            } else if (parsedValue <= 200) {
+                              return 'Nominal harus lebih dari 200 rupiah!';
+                            }
+
                             return null;
                           },
+
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
                           onChanged: (value) {
                             final numberFormat = NumberFormat("#,##0", "id_ID");
                             final newValue = value.replaceAll(",", "");
@@ -398,17 +355,16 @@ class _CreateHutangState extends State<CreateHutang> {
                       ),
                       const SizedBox(height: 40),
                       ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           if (_formKey.currentState!.validate()) {
                             HutangModel hutangmodel = HutangModel(
                               namaPemberiPinjam: namaPemberiPinjam!,
-                              noteleponPemberiPinjam: noteleponPemberiPinjam!,
                               nominalPinjam: nominalPinjam!,
                               tanggalPinjam: tanggalPinjam!,
                               tanggalJatuhTempo: tanggalJatuhTempo!,
                               deskripsi: deskripsi ?? '',
                             );
-                            hutangController.addHutangManual(hutangmodel);
+                            await hutangController.addHutangManual(hutangmodel);
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                   content: Text('Data berhasil ditambahkan')),

@@ -17,7 +17,7 @@ class _CreatePiutangState extends State<CreatePiutang> {
   final piutangController = PiutangController();
 
   String? namaPeminjam;
-  String? noteleponPeminjam;
+
   String? nominalDiPinjam;
   String? tanggalDiPinjam;
   String? tanggalJatuhTempo;
@@ -55,7 +55,7 @@ class _CreatePiutangState extends State<CreatePiutang> {
               child: Container(
                 width: 350,
                 decoration: const BoxDecoration(
-                  color: Color(0xFF24675B),
+                  color: Color(0xFFB18154),
                   borderRadius: BorderRadius.all(Radius.circular(20.0)),
                 ),
                 child: Form(
@@ -104,62 +104,10 @@ class _CreatePiutangState extends State<CreatePiutang> {
                             }
                             return null;
                           },
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
                           onChanged: (value) {
                             setState(() {
                               namaPeminjam = value;
-                            });
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 10.0,
-                          horizontal: 30.0,
-                        ),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'No. Telepon',
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.start,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        width: 300,
-                        child: TextFormField(
-                          decoration: InputDecoration(
-                            hintText: 'Masukkan nomor telepon',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            filled: true,
-                            fillColor: Colors.white,
-                          ),
-                          keyboardType: TextInputType
-                              .number, // Set the keyboard type to number
-                          inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter
-                                .digitsOnly // Allow only digits
-                          ],
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Nomor telepon tidak boleh kosong!';
-                            } else if (value.length < 10 || value.length > 13) {
-                              return 'Nomor telepon harus memiliki panjang 10-13 karakter!';
-                            } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-                              return 'Nomor telepon hanya boleh berisi angka.';
-                            }
-                            return null;
-                          },
-                          onChanged: (value) {
-                            setState(() {
-                              noteleponPeminjam = value;
                             });
                           },
                         ),
@@ -210,6 +158,7 @@ class _CreatePiutangState extends State<CreatePiutang> {
                             }
                             return null;
                           },
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
                           onChanged: (value) {
                             final numberFormat = NumberFormat("#,##0", "id_ID");
                             final newValue = value.replaceAll(",", "");
@@ -397,11 +346,10 @@ class _CreatePiutangState extends State<CreatePiutang> {
                       ),
                       const SizedBox(height: 40),
                       ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           if (_formKey.currentState!.validate()) {
                             PiutangModel piutangmodel = PiutangModel(
                               namaPeminjam: namaPeminjam!,
-                              noteleponPeminjam: noteleponPeminjam!,
                               nominalDiPinjam: nominalDiPinjam!,
                               tanggalDiPinjam: tanggalDiPinjam!,
                               tanggalJatuhTempo: tanggalJatuhTempo!,
@@ -417,7 +365,7 @@ class _CreatePiutangState extends State<CreatePiutang> {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFB18154),
+                          backgroundColor: Color(0xFF24675B),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,7 +7,7 @@ import 'package:tugasakhir/view/formbayar.dart';
 
 class DetailPiutang extends StatefulWidget {
   final String namaPeminjam;
-  final String noteleponPeminjam;
+
   final String nominalDiPinjam;
   final String tanggalDiPinjam;
   final String tanggalJatuhTempo;
@@ -17,7 +18,6 @@ class DetailPiutang extends StatefulWidget {
   const DetailPiutang({
     Key? key,
     required this.namaPeminjam,
-    required this.noteleponPeminjam,
     required this.nominalDiPinjam,
     required this.tanggalDiPinjam,
     required this.tanggalJatuhTempo,
@@ -32,6 +32,7 @@ class DetailPiutang extends StatefulWidget {
 
 class _DetailPiutangState extends State<DetailPiutang> {
   final PiutangController _piutangController = PiutangController();
+
   String _sisaPiutang = '0';
   String _totalBayar = '0';
   double _progress = 0.0;
@@ -39,6 +40,7 @@ class _DetailPiutangState extends State<DetailPiutang> {
   @override
   void initState() {
     super.initState();
+    setState(() {});
     _loadData();
   }
 
@@ -79,6 +81,15 @@ class _DetailPiutangState extends State<DetailPiutang> {
     });
   }
 
+  Future<String> _fetchUsername(String userId) async {
+    if (userId.isEmpty) return 'N/A'; // Handle empty userId
+
+    DocumentSnapshot userDoc =
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
+
+    return userDoc['uName'] ?? 'N/A';
+  }
+
   @override
   void dispose() {
     _piutangController.dispose();
@@ -103,7 +114,7 @@ class _DetailPiutangState extends State<DetailPiutang> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Card(
-              color: const Color(0xFF24675B),
+              color: const Color(0xFFB18154),
               elevation: 4,
               child: Padding(
                 padding: const EdgeInsets.all(10.0),
@@ -116,24 +127,6 @@ class _DetailPiutangState extends State<DetailPiutang> {
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 20),
-                    ),
-                    const SizedBox(height: 5),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.phone,
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          widget.noteleponPeminjam,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
                     ),
                     const SizedBox(height: 5),
                     Row(
@@ -256,19 +249,39 @@ class _DetailPiutangState extends State<DetailPiutang> {
                           documents[index].data() as Map<String, dynamic>;
                       final nominalBayar = data['nominalBayar'] ?? 0;
                       final tanggalBayar = data['tanggalBayar'] ?? 'N/A';
+                      final userId = data['userId'];
 
-                      return Card(
-                        margin: const EdgeInsets.symmetric(vertical: 5),
-                        child: ListTile(
-                          title: Text(
-                              'Nominal Bayar: Rp${nominalBayar.toString()}'),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Tanggal Bayar: ${tanggalBayar.toString()}'),
-                            ],
-                          ),
-                        ),
+                      return FutureBuilder<String>(
+                        future: _fetchUsername(userId),
+                        builder: (context, usernameSnapshot) {
+                          String username = 'Loading...';
+                          if (usernameSnapshot.connectionState ==
+                              ConnectionState.done) {
+                            if (usernameSnapshot.hasError) {
+                              username = 'Error fetching username';
+                            } else {
+                              username = usernameSnapshot.data ?? 'N/A';
+                            }
+                          }
+
+                          return Card(
+                            margin: const EdgeInsets.symmetric(vertical: 5),
+                            child: ListTile(
+                              title: Text(
+                                  'Nominal Bayar: Rp${nominalBayar.toString()}'),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                      'Tanggal Bayar: ${tanggalBayar.toString()}'),
+                                  Text(
+                                    'Penginput: $username', // Menampilkan username
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       );
                     },
                   );
@@ -301,7 +314,7 @@ class _DetailPiutangState extends State<DetailPiutang> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          backgroundColor: const Color(0xFF24675B),
+                          backgroundColor: const Color(0xFFB18154),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                         child: const Text(

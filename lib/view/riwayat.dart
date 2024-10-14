@@ -21,12 +21,14 @@ class _RiwayatState extends State<Riwayat> {
   void initState() {
     super.initState();
     // Fetch initial data when the widget is first initialized
-    _hutangController.getHistorySortedByDate();
+    _hutangController.hutangHistoryStream();
+    _piutangController.piutangHistoryStream();
   }
 
   @override
   void dispose() {
     _hutangController.dispose();
+    _piutangController.dispose();
     super.dispose();
   }
 
@@ -84,7 +86,8 @@ class _RiwayatState extends State<Riwayat> {
                 child: Text('Terjadi kesalahan saat memuat data'));
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('Tidak ada data hutang'));
+            return const Center(
+                child: Text('Tidak ada data hutang yang selesai'));
           }
 
           final List<DocumentSnapshot> data = snapshot.data!;
@@ -93,28 +96,22 @@ class _RiwayatState extends State<Riwayat> {
             itemBuilder: (context, index) {
               var hutangData = data[index];
               return FutureBuilder<Map<String, String>>(
-                future: _loadData(
+                future: _loadDataHutang(
                     hutangData['hutangId'] ?? '0', hutangData['nominalPinjam']),
                 builder:
                     (context, AsyncSnapshot<Map<String, String>> snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
+                    return Center(child: Container());
                   }
                   if (snapshot.hasError) {
                     return const Center(
                         child: Text('Terjadi kesalahan saat memuat data'));
                   }
 
-                  // Check if snapshot.data is null
-                  if (snapshot.data == null) {
-                    return const Center(child: Text('Data is null'));
-                  }
-
                   var hutangDetailData = snapshot.data!;
                   var sisaHutang = hutangDetailData['sisaHutang'] ?? '0';
                   var totalBayar = hutangDetailData['totalBayar'] ?? '0';
 
-                  // Menghitung progres sesuai dengan jumlah yang sudah dibayar
                   double totalBayarDouble = double.tryParse(
                           totalBayar.replaceAll('.', '').replaceAll(',', '')) ??
                       0.0;
@@ -124,11 +121,10 @@ class _RiwayatState extends State<Riwayat> {
                               .replaceAll(',', '')) ??
                       1.0;
                   double _progress = totalBayarDouble / nominalPinjamDouble;
+
                   return Padding(
                     padding: const EdgeInsets.symmetric(
-                      vertical: 5.0,
-                      horizontal: 20.0,
-                    ),
+                        vertical: 5.0, horizontal: 20.0),
                     child: GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -137,8 +133,6 @@ class _RiwayatState extends State<Riwayat> {
                             builder: (context) => DetailHutang(
                               namaPemberiPinjam:
                                   hutangData['namaPemberiPinjam'],
-                              noteleponPemberiPinjam:
-                                  hutangData['noteleponPemberiPinjam'],
                               nominalPinjam: hutangData['nominalPinjam'],
                               tanggalPinjam: hutangData['tanggalPinjam'],
                               tanggalJatuhTempo:
@@ -150,7 +144,7 @@ class _RiwayatState extends State<Riwayat> {
                           ),
                         ).then((_) {
                           setState(() {
-                            _hutangController.getHistorySortedByDate();
+                            _hutangController.hutangHistoryStream();
                           });
                         });
                       },
@@ -194,17 +188,17 @@ class _RiwayatState extends State<Riwayat> {
   Widget _buildPiutangView() {
     return SafeArea(
       child: StreamBuilder<List<DocumentSnapshot>>(
-        stream: _piutangController.stream,
+        stream: _piutangController.piutangHistoryStream(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return const Center(
-                child: Text('Terjadi kesalahan saat memuat data'));
+            return Center(child: Text('Error: ${snapshot.error}'));
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('Tidak ada data piutang'));
+            return const Center(
+                child: Text('Tidak ada data piutang yang selesai'));
           }
 
           final List<DocumentSnapshot> data = snapshot.data!;
@@ -213,28 +207,22 @@ class _RiwayatState extends State<Riwayat> {
             itemBuilder: (context, index) {
               var piutangData = data[index];
               return FutureBuilder<Map<String, String>>(
-                future: _loadData(piutangData['piutangId'] ?? '0',
+                future: _loadDataPiutang(piutangData['piutangId'] ?? '0',
                     piutangData['nominalDiPinjam']),
                 builder:
                     (context, AsyncSnapshot<Map<String, String>> snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
+                    return Center(child: Container());
                   }
                   if (snapshot.hasError) {
                     return const Center(
                         child: Text('Terjadi kesalahan saat memuat data'));
                   }
 
-                  // Check if snapshot.data is null
-                  if (snapshot.data == null) {
-                    return const Center(child: Text('Data is null'));
-                  }
-
                   var piutangDetailData = snapshot.data!;
                   var sisaPiutang = piutangDetailData['sisaPiutang'] ?? '0';
                   var totalBayar = piutangDetailData['totalBayar'] ?? '0';
 
-                  // Menghitung progres sesuai dengan jumlah yang sudah dibayar
                   double totalBayarDouble = double.tryParse(
                           totalBayar.replaceAll('.', '').replaceAll(',', '')) ??
                       0.0;
@@ -255,8 +243,6 @@ class _RiwayatState extends State<Riwayat> {
                           MaterialPageRoute(
                             builder: (context) => DetailPiutang(
                               namaPeminjam: piutangData['namaPeminjam'],
-                              noteleponPeminjam:
-                                  piutangData['noteleponPeminjam'],
                               nominalDiPinjam: piutangData['nominalDiPinjam'],
                               tanggalDiPinjam: piutangData['tanggalDiPinjam'],
                               tanggalJatuhTempo:
@@ -268,12 +254,12 @@ class _RiwayatState extends State<Riwayat> {
                           ),
                         ).then((_) {
                           setState(() {
-                            _piutangController.getPiutangSortedByDate();
+                            _piutangController.piutangHistoryStream();
                           });
                         });
                       },
                       child: Card(
-                        color: const Color(0xFF24675B),
+                        color: const Color(0xFFB18154),
                         elevation: 4,
                         child: Padding(
                           padding: const EdgeInsets.all(10.0),
@@ -309,7 +295,7 @@ class _RiwayatState extends State<Riwayat> {
     );
   }
 
-  Future<Map<String, String>> _loadData(
+  Future<Map<String, String>> _loadDataHutang(
       String hutangId, String nominalPinjam) async {
     String totalBayar = await _hutangController.getTotalNominalBayar(hutangId);
     String sisaHutang = await _hutangController.calculateTotalSisaHutang(
@@ -317,6 +303,18 @@ class _RiwayatState extends State<Riwayat> {
     return {
       'totalBayar': totalBayar,
       'sisaHutang': sisaHutang,
+    };
+  }
+
+  Future<Map<String, String>> _loadDataPiutang(
+      String piutangId, String nominalDiPinjam) async {
+    String totalBayar =
+        await _piutangController.getTotalNominalBayar(piutangId);
+    String sisaPiutang = await _piutangController.calculateTotalSisaPiutang(
+        piutangId, nominalDiPinjam);
+    return {
+      'totalBayar': totalBayar,
+      'sisaPiutang': sisaPiutang,
     };
   }
 
@@ -367,7 +365,7 @@ class _RiwayatState extends State<Riwayat> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildAmountContainer(
-            context, 'Pinjam', 'Rp${hutangData['nominalPinjam']}'),
+            context, 'Hutang', 'Rp${hutangData['nominalPinjam']}'),
         _buildAmountContainer(context, 'Dibayar', 'Rp$totalBayar'),
         _buildAmountContainer(context, 'Sisa', 'Rp$sisaHutang'),
       ],

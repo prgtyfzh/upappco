@@ -61,13 +61,14 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Nama tidak boleh kosong'; // Validasi nama kosong
+                            return 'Nama harus diisi'; // Validasi nama kosong
                           }
                           if (value.length > 30) {
                             return 'Nama tidak boleh lebih dari 30 karakter'; // Validasi panjang nama
                           }
                           return null;
                         },
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         onChanged: (value) {
                           setState(() {
                             name = value; // Menyimpan nilai nama
@@ -88,12 +89,13 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Email tidak boleh kosong'; // Validasi email kosong
+                            return 'Email harus diisi'; // Validasi email kosong
                           } else if (!value.contains('@')) {
-                            return 'Masukkan email yang benar'; // Validasi format email
+                            return 'Format email tidak valid'; // Validasi format email
                           }
                           return null;
                         },
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         onChanged: (value) {
                           setState(() {
                             email = value; // Menyimpan nilai email
@@ -130,12 +132,13 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Kata sandi tidak boleh kosong'; // Validasi password kosong
+                            return 'Kata sandi harus diisi'; // Validasi password kosong
                           } else if (value.length < 6) {
                             return 'Kata sandi harus berisi minimal 6 karakter'; // Validasi panjang password
                           }
                           return null;
                         },
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         onChanged: (value) {
                           setState(() {
                             password = value; // Menyimpan nilai password
@@ -171,13 +174,14 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Kata sandi tidak boleh kosong'; // Validasi konfirmasi password kosong
+                            return 'Kata sandi harus diisi'; // Validasi konfirmasi password kosong
                           }
                           if (value != _passwordController.text) {
-                            return 'Kata sandi harus sama'; // Validasi kesesuaian password
+                            return 'Kata sandi tidak cocok'; // Validasi kesesuaian password
                           }
                           return null;
                         },
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         onChanged: (value) {
                           setState(() {
                             confirmPassword =

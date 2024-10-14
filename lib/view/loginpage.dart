@@ -55,12 +55,13 @@ class _LoginPageState extends State<LoginPage> {
                       },
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Email tidak boleh kosong';
+                          return 'Email harus diisi';
                         } else if (!value.contains('@')) {
-                          return 'Masukkan email yang benar';
+                          return 'Format email tidak valid';
                         }
                         return null;
                       },
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -94,10 +95,11 @@ class _LoginPageState extends State<LoginPage> {
                       },
                       validator: (value) {
                         if (value!.isEmpty) {
-                          return 'Kata sandi tidak boleh kosong';
+                          return 'Kata sandi harus diisi3';
                         }
                         return null;
                       },
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                     ),
                   ),
                   const SizedBox(height: 35),

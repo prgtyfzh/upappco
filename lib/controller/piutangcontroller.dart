@@ -24,20 +24,20 @@ class PiutangController {
     final User? user = _auth.currentUser;
     if (user != null) {
       final piutang = piutangmodel.toMap();
-      piutang['userId'] = user.uid; // Add user ID to the document
+      piutang['userId'] = user.uid;
       final DocumentReference docRef = await piutangCollection.add(piutang);
       final String docID = docRef.id;
 
       final PiutangModel updatedPiutangModel = PiutangModel(
         piutangId: docID,
         namaPeminjam: piutangmodel.namaPeminjam,
-        noteleponPeminjam: piutangmodel.noteleponPeminjam,
         nominalDiPinjam: piutangmodel.nominalDiPinjam,
         tanggalDiPinjam: piutangmodel.tanggalDiPinjam,
         tanggalJatuhTempo: piutangmodel.tanggalJatuhTempo,
         deskripsi: piutangmodel.deskripsi,
         totalBayar: '',
         sisaHutang: '',
+        status: '',
       );
 
       await docRef.update(updatedPiutangModel.toMap());
@@ -48,7 +48,7 @@ class PiutangController {
     final User? user = _auth.currentUser;
     if (user != null) {
       final piutang = piutangmodel.toMap();
-      piutang['userId'] = user.uid; // Add user ID to the document
+      piutang['userId'] = user.uid;
       final DocumentReference docRef =
           piutangCollection.doc(piutangmodel.piutangId);
       await docRef.set(piutang);
@@ -56,108 +56,16 @@ class PiutangController {
       final PiutangModel updatedPiutangModel = PiutangModel(
         piutangId: piutangmodel.piutangId,
         namaPeminjam: piutangmodel.namaPeminjam,
-        noteleponPeminjam: piutangmodel.noteleponPeminjam,
         nominalDiPinjam: piutangmodel.nominalDiPinjam,
         tanggalDiPinjam: piutangmodel.tanggalDiPinjam,
         tanggalJatuhTempo: piutangmodel.tanggalJatuhTempo,
         deskripsi: piutangmodel.deskripsi,
         totalBayar: piutangmodel.totalBayar,
         sisaHutang: piutangmodel.sisaHutang,
+        status: piutangmodel.status,
       );
 
       await docRef.update(updatedPiutangModel.toMap());
-    }
-  }
-
-  // void listenToHutangChanges(String hutangId) {
-  //   final User? user = _auth.currentUser;
-  //   if (user != null) {
-  //     // Memonitor perubahan pada dokumen Hutang dengan ID tertentu
-  //     FirebaseFirestore.instance
-  //         .collection('hutang')
-  //         .doc(hutangId)
-  //         .snapshots()
-  //         .listen((snapshot) {
-  //       if (snapshot.exists) {
-  //         // Ambil data Hutang yang berubah
-  //         final hutangData = snapshot.data();
-
-  //         // Perbarui Piutang yang sesuai dengan Hutang ini
-  //         piutangCollection
-  //             .where('piutangId',
-  //                 isEqualTo:
-  //                     hutangData?['hutangId']) // Tambahkan pengecekan null (?)
-  //             .get()
-  //             .then((querySnapshot) {
-  //           if (querySnapshot.docs.isNotEmpty) {
-  //             querySnapshot.docs.forEach((doc) {
-  //               final updatedPiutang = PiutangModel(
-  //                 piutangId: doc['piutangId'],
-  //                 namaPeminjam: hutangData?['namaPemberiPinjam'],
-  //                 noteleponPeminjam: hutangData?['noteleponPemberiPinjam'],
-  //                 nominalDiPinjam: hutangData?['nominalPinjam'],
-  //                 tanggalDiPinjam: hutangData?['tanggalPinjam'],
-  //                 tanggalJatuhTempo: hutangData?['tanggalJatuhTempo'],
-  //                 deskripsi: hutangData?['deskripsi'],
-  //                 totalBayar: hutangData?['totalBayar'],
-  //                 sisaHutang: hutangData?['sisaHutang'],
-  //               );
-
-  //               // Update data Piutang di Firestore
-  //               doc.reference.update(updatedPiutang.toMap());
-  //             });
-  //           }
-  //         });
-  //       }
-  //     });
-  //   }
-  // }
-
-  // Future<List<BayarHutangModel>> getBayarHutangByHutangId(
-  //     String piutangId) async {
-  //   try {
-  //     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-  //         .collection('pembayaran')
-  //         .where('hutangId', isEqualTo: piutangId)
-  //         .get();
-
-  //     List<BayarHutangModel> bayarHutangList = querySnapshot.docs.map((doc) {
-  //       return BayarHutangModel(
-  //         bayarHutangId: doc.id,
-  //         hutangId: doc['piutangId'],
-  //         nominalBayar: doc['nominalBayar'],
-  //         tanggalBayar: doc['tanggalBayar'],
-  //       );
-  //     }).toList();
-
-  //     return bayarHutangList;
-  //   } catch (e) {
-  //     print('Error fetching BayarHutang data: $e');
-  //     throw Exception('Failed to get BayarHutang data');
-  //   }
-  // }
-
-  Future<List<PembayaranModel>> getBayarHutangByPiutangId(
-      String piutangId) async {
-    try {
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection('pembayaran')
-          .where('piutangId', isEqualTo: piutangId)
-          .get();
-
-      List<PembayaranModel> bayarHutangList = querySnapshot.docs.map((doc) {
-        return PembayaranModel(
-          pembayaranId: doc.id,
-          piutangId: doc['piutangId'],
-          nominalBayar: doc['nominalBayar'],
-          tanggalBayar: doc['tanggalBayar'],
-        );
-      }).toList();
-
-      return bayarHutangList;
-    } catch (e) {
-      print('Error fetching BayarHutang data: $e');
-      throw Exception('Failed to get BayarHutang data');
     }
   }
 
@@ -178,48 +86,6 @@ class PiutangController {
       print('Error getting nominalDiPinjam: $e');
       return '0';
     }
-  }
-
-  // Future<List<DocumentSnapshot>> getPiutang() async {
-  //   final User? user = _auth.currentUser;
-  //   if (user != null) {
-  //     final piutang =
-  //         await piutangCollection.where('userId', isEqualTo: user.uid).get();
-  //     streamController.sink.add(piutang.docs);
-  //     return piutang.docs;
-  //   }
-  //   return [];
-  // }
-
-  // Future<List<DocumentSnapshot>> getPiutangSortedByDate() async {
-  //   final User? user = _auth.currentUser;
-  //   if (user != null) {
-  //     final piutang =
-  //         await piutangCollection.where('userId', isEqualTo: user.uid).get();
-  //     List<DocumentSnapshot> piutangDocs = piutang.docs;
-  //     streamController.sink.add(piutangDocs);
-  //     return piutangDocs;
-  //   }
-  //   return [];
-  // }
-
-  Future<List<DocumentSnapshot>> getPiutangSortedByDate(
-      {bool sortedByDate = false}) async {
-    final User? user = _auth.currentUser;
-    if (user != null) {
-      Query query = piutangCollection.where('userId', isEqualTo: user.uid);
-
-      if (sortedByDate) {
-        query = query.orderBy(
-            'tanggalDiPinjam'); // Assuming 'tanggal' is the field name for date.
-      }
-
-      final piutang = await query.get();
-      List<DocumentSnapshot> piutangDocs = piutang.docs;
-      streamController.sink.add(piutangDocs);
-      return piutangDocs;
-    }
-    return [];
   }
 
   Future<String> getTotalNominalBayar(String piutangId) async {
@@ -323,12 +189,18 @@ class PiutangController {
     }
   }
 
-  Future<PiutangModel> getPiutangById(String piutangId) async {
+  Future<Map<String, dynamic>> getPiutangById(String piutangId) async {
     final doc = await piutangCollection.doc(piutangId).get();
+    final User? user = _auth.currentUser;
+
     if (doc.exists) {
-      return PiutangModel.fromMap(doc.data() as Map<String, dynamic>);
+      final piutangData = doc.data() as Map<String, dynamic>;
+
+      piutangData['userId'] = user?.uid;
+
+      return piutangData;
     } else {
-      throw Exception('Piutang not found');
+      throw Exception('Hutang not found');
     }
   }
 
@@ -361,119 +233,67 @@ class PiutangController {
     return '0';
   }
 
-  // Future<void> movePiutangToHistory(String piutangId) async {
-  //   try {
-  //     final DocumentSnapshot snapshot =
-  //         await piutangCollection.doc(piutangId).get();
-  //     if (snapshot.exists) {
-  //       final data = snapshot.data() as Map<String, dynamic>?;
-  //       if (data != null) {
-  //         data['userId'] =
-  //             _auth.currentUser!.uid; // Add user ID to the document
-  //         await _firestore.collection('history').doc(piutangId).set(data);
-  //         await piutangCollection.doc(piutangId).delete();
-  //       }
-  //     } else {
-  //       throw Exception('Hutang with id $piutangId does not exist');
-  //     }
-  //   } catch (e) {
-  //     print('Error moving hutang to history: $e');
-  //     rethrow;
-  //   }
-  // }
-
   Future<void> removePiutang(String piutangId) async {
-    await piutangCollection.doc(piutangId).delete();
+    try {
+      await piutangCollection.doc(piutangId).delete();
+    } catch (e) {
+      print('Error removing piutang: $e');
+      rethrow;
+    }
+  }
+
+  Stream<List<DocumentSnapshot>> piutangWithoutStatusStream() {
+    final User? user = _auth.currentUser;
+
+    if (user != null) {
+      return _firestore
+          .collection('piutang')
+          .where('userId', isEqualTo: user.uid)
+          .where('status', isEqualTo: '')
+          .orderBy('tanggalDiPinjam', descending: true)
+          .snapshots()
+          .map((querySnapshot) => querySnapshot.docs);
+    } else {
+      return Stream.value([]);
+    }
   }
 
   Stream<List<DocumentSnapshot>> piutangHistoryStream() {
-    return _firestore
-        .collection('history')
-        .orderBy('tanggalDiPinjam')
-        .snapshots()
-        .map((querySnapshot) => querySnapshot.docs);
+    final User? user = _auth.currentUser;
+
+    if (user != null) {
+      return _firestore
+          .collection('piutang')
+          .where('userId', isEqualTo: user.uid)
+          .where('status', isEqualTo: 'selesai')
+          .orderBy('tanggalDiPinjam', descending: true)
+          .snapshots()
+          .map((querySnapshot) => querySnapshot.docs);
+    } else {
+      return Stream.value([]);
+    }
   }
 
-  Future<void> movePiutangToHistory(String piutangId) async {
+  Future<void> selesaikanPiutang(String piutangId) async {
     try {
-      DocumentSnapshot piutangSnapshot =
-          await _firestore.collection('piutang').doc(piutangId).get();
-      if (piutangSnapshot.exists) {
-        Map<String, dynamic> piutangData =
-            piutangSnapshot.data() as Map<String, dynamic>;
+      DocumentReference piutangRef =
+          _firestore.collection('piutang').doc(piutangId);
+      DocumentSnapshot piutangSnapshot = await piutangRef.get();
 
-        // Move data to history collection
-        await _firestore.collection('history').doc(piutangId).set(piutangData);
-
-        // Delete from hutang collection
-        await _firestore.collection('piutang').doc(piutangId).delete();
+      if (!piutangSnapshot.exists) {
+        throw Exception('Data piutang tidak ditemukan');
       }
+
+      await piutangRef.update({
+        'status': 'selesai',
+        'tanggalSelesai': DateTime.now().toString(),
+      });
+
+      print('Piutang berhasil diselesaikan');
     } catch (e) {
-      print('Error moving hutang to history: $e');
+      print('Gagal menyelesaikan piutang: $e');
     }
   }
-
-  Future<List<Map<String, dynamic>>> getHistorySortedByDate() async {
-    try {
-      QuerySnapshot querySnapshot = await _firestore
-          .collection('history')
-          .orderBy('tanggalDiPinjam')
-          .get();
-      return querySnapshot.docs
-          .map((doc) => doc.data() as Map<String, dynamic>)
-          .toList();
-    } catch (e) {
-      print('Error fetching history sorted by date: $e');
-      return [];
-    }
-  }
-
-  // Future<List<DocumentSnapshot>> getPiutangHistorySortedByDate() async {
-  //   final User? user = _auth.currentUser;
-  //   if (user != null) {
-  //     final piutang =
-  //         await piutangCollection.where('userId', isEqualTo: user.uid).get();
-  //     List<DocumentSnapshot> piutangDocs = piutang.docs;
-  //     streamController.sink.add(piutangDocs);
-  //     return piutangDocs;
-  //   }
-  //   return [];
-  // }
-
-  // Future<String> getTotalPiutang() async {
-  //   final User? user = _auth.currentUser;
-  //   if (user != null) {
-  //     try {
-  //       final piutang =
-  //           await piutangCollection.where('userId', isEqualTo: user.uid).get();
-  //       double total = 0;
-  //       piutang.docs.forEach((doc) {
-  //         PiutangModel piutangModel =
-  //             PiutangModel.fromMap(doc.data() as Map<String, dynamic>);
-  //         double nominalDiPinjam =
-  //             double.tryParse(piutangModel.nominalDiPinjam!) ?? 0;
-  //         total += nominalDiPinjam;
-  //       });
-  //       return total.toStringAsFixed(3);
-  //     } catch (e) {
-  //       print('Error while getting total piutang: $e');
-  //       return '0';
-  //     }
-  //   }
-  //   return '0';
-  // }
-
-  // Future<void> updatePiutangWithPayments(
-  //     String piutangId, double totalBayar, double sisaPiutang) async {
-  //   try {
-  //     await piutangCollection.doc(piutangId).update({
-  //       'totalBayar': FieldValue.increment(totalBayar),
-  //       'sisaPiutang': FieldValue.increment(-sisaPiutang),
-  //     });
-  //   } catch (e) {
-  //     throw Exception('Failed to update Piutang with payments: $e');
-  //   }
-  // }
 
   void dispose() {
     streamController.close();

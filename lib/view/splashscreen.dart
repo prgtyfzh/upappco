@@ -1,6 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:tugasakhir/view/loginpage.dart';
+import 'package:tugasakhir/main_page.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -28,10 +29,13 @@ class _SplashScreenState extends State<SplashScreen>
     _animationController.forward(); // Memulai animasi
 
     // Menjalankan fungsi untuk pindah ke halaman login setelah 3 detik
-    Future.delayed(const Duration(seconds: 3), () {
-      Navigator.pushReplacement(
+    Future.delayed(const Duration(seconds: 2), () {
+      Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
+        CupertinoPageRoute(
+          builder: (context) => const MainPage(),
+        ),
+        (route) => false,
       );
     });
 

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tugasakhir/controller/hutangcontroller.dart';
@@ -15,11 +16,16 @@ class Hutang extends StatefulWidget {
 
 class _HutangState extends State<Hutang> {
   final HutangController _hutangController = HutangController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  String keyword = "";
+  bool isSearching = false;
 
   @override
   void initState() {
     super.initState();
-    _hutangController.getHutangSortedByDate();
+    _hutangController.hutangWithoutStatusStream();
+    _loadData;
+    setState(() {});
   }
 
   @override
@@ -33,11 +39,51 @@ class _HutangState extends State<Hutang> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text(
-          'Daftar Hutang',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: isSearching
+            ? Container(
+                margin: const EdgeInsets.all(10),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                width: 350,
+                height: 45,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: TextField(
+                  decoration: const InputDecoration(
+                    hintText: 'Cari hutang...',
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(vertical: 11),
+                  ),
+                  onChanged: (newKeyword) {
+                    setState(() {
+                      keyword = newKeyword;
+                    });
+                  },
+                ),
+              )
+            : const Text(
+                'Daftar Hutang',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
         actions: [
+          IconButton(
+            icon: Icon(isSearching ? Icons.close : Icons.search),
+            onPressed: () {
+              setState(() {
+                isSearching = !isSearching;
+                keyword = ''; // Reset keyword when closing search
+              });
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.qr_code_scanner),
             onPressed: () {
@@ -56,12 +102,13 @@ class _HutangState extends State<Hutang> {
           children: [
             Expanded(
               child: StreamBuilder<List<DocumentSnapshot>>(
-                stream: _hutangController.stream,
+                stream: _hutangController.hutangWithoutStatusStream(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (snapshot.hasError) {
+                    // Tampilkan kesalahan jika ada
                     return const Center(
                         child: Text('Terjadi kesalahan saat memuat data'));
                   }
@@ -70,10 +117,24 @@ class _HutangState extends State<Hutang> {
                   }
 
                   final List<DocumentSnapshot> data = snapshot.data!;
+
+                  // Implementasi logika pencarian
+                  List<DocumentSnapshot> filteredDocuments =
+                      data.where((document) {
+                    var hutangData = document.data() as Map<String, dynamic>;
+                    String searchField = hutangData['namaPemberiPinjam'] +
+                        hutangData['nominalPinjam'].toString() +
+                        hutangData['tanggalPinjam'] +
+                        hutangData['tanggalJatuhTempo'];
+                    return searchField
+                        .toLowerCase()
+                        .contains(keyword.toLowerCase());
+                  }).toList();
+
                   return ListView.builder(
-                    itemCount: data.length,
+                    itemCount: filteredDocuments.length,
                     itemBuilder: (context, index) {
-                      var hutangData = data[index];
+                      var hutangData = filteredDocuments[index];
                       return FutureBuilder<Map<String, String>>(
                         future: _loadData(hutangData['hutangId'] ?? '0',
                             hutangData['nominalPinjam']),
@@ -81,8 +142,7 @@ class _HutangState extends State<Hutang> {
                             AsyncSnapshot<Map<String, String>> snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return const Center(
-                                child: CircularProgressIndicator());
+                            return Center(child: Container());
                           }
                           if (snapshot.hasError) {
                             return const Center(
@@ -125,8 +185,6 @@ class _HutangState extends State<Hutang> {
                                     builder: (context) => DetailHutang(
                                       namaPemberiPinjam:
                                           hutangData['namaPemberiPinjam'],
-                                      noteleponPemberiPinjam:
-                                          hutangData['noteleponPemberiPinjam'],
                                       nominalPinjam:
                                           hutangData['nominalPinjam'],
                                       tanggalPinjam:
@@ -139,7 +197,8 @@ class _HutangState extends State<Hutang> {
                                   ),
                                 ).then((_) {
                                   setState(() {
-                                    _hutangController.getHutangSortedByDate();
+                                    _hutangController
+                                        .hutangWithoutStatusStream();
                                   });
                                 });
                               },
@@ -193,7 +252,7 @@ class _HutangState extends State<Hutang> {
           ).then((value) {
             if (value == true) {
               setState(() {
-                _hutangController.getHutangSortedByDate();
+                _hutangController.hutangWithoutStatusStream();
               });
             }
           });
@@ -249,7 +308,51 @@ class _HutangState extends State<Hutang> {
             }
           },
           onSelected: (String value) {
-            _handleMenuSelection(value, hutangData);
+            if (value == 'selesai') {
+              _showConfirmationDialog(
+                context,
+                title: 'Konfirmasi Penyelesaian Hutang',
+                content: 'Apakah Anda yakin ingin menyelesaikan hutang ini?',
+                onConfirm: () async {
+                  // Mendapatkan user ID yang aktif
+                  final String userIdPihakHutang = _auth.currentUser?.uid ?? '';
+
+                  if (userIdPihakHutang.isNotEmpty) {
+                    // Selesaikan hutang
+                    await _hutangController
+                        .selesaikanHutang(hutangData['hutangId']);
+                    setState(() {
+                      _hutangController.hutangWithoutStatusStream();
+                    });
+                  } else {
+                    // Tampilkan pesan kesalahan jika user ID tidak ditemukan
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('User ID tidak ditemukan')),
+                    );
+                  }
+                },
+              );
+            } else if (value == 'delete') {
+              _showConfirmationDialog(
+                context,
+                title: 'Konfirmasi Hapus Hutang',
+                content: 'Apakah Anda yakin ingin menghapus hutang ini?',
+                onConfirm: () {
+                  _hutangController.removeHutang(hutangData['hutangId']);
+                  setState(() {
+                    _hutangController.hutangWithoutStatusStream();
+                  });
+                },
+              );
+            } else if (value == 'qrCode') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      QRCodeHutang(hutangId: hutangData['hutangId']),
+                ),
+              );
+            }
           },
         ),
       ],
@@ -287,47 +390,47 @@ class _HutangState extends State<Hutang> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildAmountContainer(
-            context, 'Pinjam', 'Rp${hutangData['nominalPinjam']}'),
+            context, 'Hutang', 'Rp${hutangData['nominalPinjam']}'),
         _buildAmountContainer(context, 'Dibayar', 'Rp$totalBayar'),
         _buildAmountContainer(context, 'Sisa', 'Rp$sisaHutang'),
       ],
     );
   }
 
-  void _handleMenuSelection(String value, var hutangData) {
-    if (value == 'selesai') {
-      _showConfirmationDialog(
-        context,
-        title: 'Konfirmasi Penyelesaian Hutang',
-        content: 'Apakah Anda yakin ingin menyelesaikan hutang ini?',
-        onConfirm: () {
-          _hutangController.moveHutangToHistory(hutangData['hutangId']);
-          setState(() {
-            _hutangController.getHutangSortedByDate();
-          });
-        },
-      );
-    } else if (value == 'delete') {
-      _showConfirmationDialog(
-        context,
-        title: 'Konfirmasi Hapus Hutang',
-        content: 'Apakah Anda yakin ingin menghapus hutang ini?',
-        onConfirm: () {
-          _hutangController.removeHutang(hutangData['hutangId']);
-          setState(() {
-            _hutangController.getHutangSortedByDate();
-          });
-        },
-      );
-    } else if (value == 'qrCode') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => QRCodeHutang(hutangId: hutangData['hutangId']),
-        ),
-      );
-    }
-  }
+  // void _handleMenuSelection(String value, var hutangData) {
+  //   if (value == 'selesai') {
+  //     _showConfirmationDialog(
+  //       context,
+  //       title: 'Konfirmasi Penyelesaian Hutang',
+  //       content: 'Apakah Anda yakin ingin menyelesaikan hutang ini?',
+  //       onConfirm: () {
+  //         _hutangController.moveHutangToHistory(hutangData['hutangId']);
+  //         setState(() {
+  //           _hutangController.getHutangSortedByDate();
+  //         });
+  //       },
+  //     );
+  //   } else if (value == 'delete') {
+  //     _showConfirmationDialog(
+  //       context,
+  //       title: 'Konfirmasi Hapus Hutang',
+  //       content: 'Apakah Anda yakin ingin menghapus hutang ini?',
+  //       onConfirm: () {
+  //         _hutangController.removeHutang(hutangData['hutangId']);
+  //         setState(() {
+  //           _hutangController.getHutangSortedByDate();
+  //         });
+  //       },
+  //     );
+  //   } else if (value == 'qrCode') {
+  //     Navigator.push(
+  //       context,
+  //       MaterialPageRoute(
+  //         builder: (context) => QRCodeHutang(hutangId: hutangData['hutangId']),
+  //       ),
+  //     );
+  //   }
+  // }
 
   void _showConfirmationDialog(BuildContext context,
       {required String title,

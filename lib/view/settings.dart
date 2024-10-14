@@ -45,6 +45,7 @@ class _PengaturanState extends State<Pengaturan> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: const Text(
           'Pengaturan',
           style: TextStyle(fontWeight: FontWeight.bold),
@@ -106,9 +107,12 @@ class _PengaturanState extends State<Pengaturan> {
       title: const Text('Keluar'),
       onTap: () async {
         await FirebaseAuth.instance.signOut();
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
+          MaterialPageRoute(
+            builder: (context) => const LoginPage(),
+          ),
+          (route) => false,
         );
       },
     );

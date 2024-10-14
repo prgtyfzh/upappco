@@ -54,7 +54,7 @@ class _QRCodePiutangState extends State<QRCodePiutang> {
     final piutang = await _piutangController.getPiutangById(widget.piutangId);
 
     final data = {
-      'piutang': piutang.toMap(),
+      'piutang': piutang,
     };
 
     return data;

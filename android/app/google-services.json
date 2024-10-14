@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "63956586291",
-    "project_id": "utangpiutang-63c49",
-    "storage_bucket": "utangpiutang-63c49.appspot.com"
+    "project_number": "998995625007",
+    "project_id": "up-akhir-app",
+    "storage_bucket": "up-akhir-app.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:63956586291:android:084be411a1f2b22dd73846",
+        "mobilesdk_app_id": "1:998995625007:android:30f696e29f1ce4f04cf2da",
         "android_client_info": {
           "package_name": "com.example.tugasakhir"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDKISRofGcqGG0aGU5mOmG7ulmfIDYiamY"
+          "current_key": "AIzaSyBxD22fZkU2od0YVAhAnX6KBrWeQH4hwMQ"
         }
       ],
       "services": {

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tugasakhir/controller/piutangcontroller.dart';
@@ -15,11 +16,16 @@ class Piutang extends StatefulWidget {
 
 class _PiutangState extends State<Piutang> {
   final PiutangController _piutangController = PiutangController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  String keyword = "";
+  bool isSearching = false;
 
   @override
   void initState() {
     super.initState();
-    _piutangController.getPiutangSortedByDate();
+    _piutangController.piutangHistoryStream();
+    _loadData;
+    setState(() {});
   }
 
   @override
@@ -33,11 +39,51 @@ class _PiutangState extends State<Piutang> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text(
-          'Daftar Piutang',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: isSearching
+            ? Container(
+                margin: const EdgeInsets.all(10),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                width: 350,
+                height: 45,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: TextField(
+                  decoration: const InputDecoration(
+                    hintText: 'Cari piutang...',
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(vertical: 11),
+                  ),
+                  onChanged: (newKeyword) {
+                    setState(() {
+                      keyword = newKeyword;
+                    });
+                  },
+                ),
+              )
+            : const Text(
+                'Daftar Piutang',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
         actions: [
+          IconButton(
+            icon: Icon(isSearching ? Icons.close : Icons.search),
+            onPressed: () {
+              setState(() {
+                isSearching = !isSearching;
+                keyword = ''; // Reset pencarian saat pencarian ditutup
+              });
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.qr_code_scanner),
             onPressed: () {
@@ -56,12 +102,13 @@ class _PiutangState extends State<Piutang> {
           children: [
             Expanded(
               child: StreamBuilder<List<DocumentSnapshot>>(
-                stream: _piutangController.stream,
+                stream: _piutangController.piutangWithoutStatusStream(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (snapshot.hasError) {
+                    // Tampilkan kesalahan jika ada
                     return const Center(
                         child: Text('Terjadi kesalahan saat memuat data'));
                   }
@@ -70,10 +117,27 @@ class _PiutangState extends State<Piutang> {
                   }
 
                   final List<DocumentSnapshot> data = snapshot.data!;
+
+                  // Implementasi logika pencarian
+                  List<DocumentSnapshot> filteredDocuments =
+                      data.where((document) {
+                    var piutangData = document.data() as Map<String, dynamic>;
+
+                    // Tentukan field apa saja yang ingin dicari (misalnya nama, nominal, tanggal)
+                    String searchField = piutangData['namaPeminjam'] +
+                        piutangData['nominalDiPinjam'].toString() +
+                        piutangData['tanggalDiPinjam'] +
+                        piutangData['tanggalJatuhTempo'];
+
+                    return searchField
+                        .toLowerCase()
+                        .contains(keyword.toLowerCase());
+                  }).toList();
+
                   return ListView.builder(
-                    itemCount: data.length,
+                    itemCount: filteredDocuments.length,
                     itemBuilder: (context, index) {
-                      var piutangData = data[index];
+                      var piutangData = filteredDocuments[index];
                       return FutureBuilder<Map<String, String>>(
                         future: _loadData(piutangData['piutangId'] ?? '0',
                             piutangData['nominalDiPinjam']),
@@ -81,8 +145,7 @@ class _PiutangState extends State<Piutang> {
                             AsyncSnapshot<Map<String, String>> snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return const Center(
-                                child: CircularProgressIndicator());
+                            return Center(child: Container());
                           }
                           if (snapshot.hasError) {
                             return const Center(
@@ -124,8 +187,6 @@ class _PiutangState extends State<Piutang> {
                                   MaterialPageRoute(
                                     builder: (context) => DetailPiutang(
                                       namaPeminjam: piutangData['namaPeminjam'],
-                                      noteleponPeminjam:
-                                          piutangData['noteleponPeminjam'],
                                       nominalDiPinjam:
                                           piutangData['nominalDiPinjam'],
                                       tanggalDiPinjam:
@@ -138,12 +199,13 @@ class _PiutangState extends State<Piutang> {
                                   ),
                                 ).then((_) {
                                   setState(() {
-                                    _piutangController.getPiutangSortedByDate();
+                                    _piutangController
+                                        .piutangWithoutStatusStream();
                                   });
                                 });
                               },
                               child: Card(
-                                color: const Color(0xFF24675B),
+                                color: const Color(0xFFB18154),
                                 elevation: 4,
                                 child: Padding(
                                   padding: const EdgeInsets.all(10.0),
@@ -192,12 +254,12 @@ class _PiutangState extends State<Piutang> {
           ).then((value) {
             if (value == true) {
               setState(() {
-                _piutangController.getPiutangSortedByDate();
+                _piutangController.piutangWithoutStatusStream();
               });
             }
           });
         },
-        backgroundColor: const Color(0xFF24675B),
+        backgroundColor: const Color(0xFFB18154),
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),
@@ -249,7 +311,53 @@ class _PiutangState extends State<Piutang> {
             }
           },
           onSelected: (String value) {
-            _handleMenuSelection(value, piutangData);
+            if (value == 'selesai') {
+              _showConfirmationDialog(
+                context,
+                title: 'Konfirmasi Penyelesaian Piutang',
+                content: 'Apakah Anda yakin ingin menyelesaikan piutang ini?',
+                onConfirm: () async {
+                  // Mendapatkan user ID yang aktif
+                  final String userIdPihakPiutang =
+                      _auth.currentUser?.uid ?? '';
+
+                  if (userIdPihakPiutang.isNotEmpty) {
+                    // Selesaikan piutang
+                    await _piutangController
+                        .selesaikanPiutang(piutangData['piutangId']);
+                    setState(() {
+                      _piutangController
+                          .piutangWithoutStatusStream(); // Sesuaikan dengan fungsi untuk memuat piutang
+                    });
+                  } else {
+                    // Tampilkan pesan kesalahan jika user ID tidak ditemukan
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('User ID tidak ditemukan')),
+                    );
+                  }
+                },
+              );
+            } else if (value == 'delete') {
+              _showConfirmationDialog(
+                context,
+                title: 'Konfirmasi Hapus Piutang',
+                content: 'Apakah Anda yakin ingin menghapus piutang ini?',
+                onConfirm: () {
+                  _piutangController.removePiutang(piutangData['piutangId']);
+                  setState(() {
+                    _piutangController.piutangWithoutStatusStream();
+                  });
+                },
+              );
+            } else if (value == 'qrCode') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      QRCodePiutang(piutangId: piutangData['piutangId']),
+                ),
+              );
+            }
           },
         ),
       ],
@@ -293,42 +401,6 @@ class _PiutangState extends State<Piutang> {
         _buildAmountContainer(context, 'Sisa', 'Rp$sisaPiutang'),
       ],
     );
-  }
-
-  void _handleMenuSelection(String value, var piutangData) {
-    if (value == 'selesai') {
-      _showConfirmationDialog(
-        context,
-        title: 'Konfirmasi Penyelesaian Piutang',
-        content: 'Apakah Anda yakin ingin menyelesaikan piutang ini?',
-        onConfirm: () {
-          _piutangController.movePiutangToHistory(piutangData['piutangId']);
-          setState(() {
-            _piutangController.getHistorySortedByDate();
-          });
-        },
-      );
-    } else if (value == 'delete') {
-      _showConfirmationDialog(
-        context,
-        title: 'Konfirmasi Hapus Piutang',
-        content: 'Apakah Anda yakin ingin menghapus piutang ini?',
-        onConfirm: () {
-          _piutangController.removePiutang(piutangData['piutangId']);
-          setState(() {
-            _piutangController.getPiutangSortedByDate();
-          });
-        },
-      );
-    } else if (value == 'qrCode') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              QRCodePiutang(piutangId: piutangData['piutangId']),
-        ),
-      );
-    }
   }
 
   void _showConfirmationDialog(BuildContext context,

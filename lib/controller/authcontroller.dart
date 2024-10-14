@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -37,10 +35,13 @@ class AuthController {
           'Daftar Berhasil',
           'Akun anda telah terdaftar.',
           () {
-            Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (context) {
-              return const LoginPage();
-            }));
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const LoginPage(),
+              ),
+              (route) => false,
+            );
           },
         );
         // Simpan userModel ke dalam database Anda
@@ -72,12 +73,14 @@ class AuthController {
           .signInWithEmailAndPassword(email: email, password: password);
       if (userCredential.user != null) {
         // Login berhasil, navigasi ke halaman utama
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
             builder: (context) => const HomePage(),
           ),
+          (route) => false,
         );
+        print("Login Sukses : $email");
       }
     } catch (e) {
       // Login gagal, tampilkan pesan kesalahan
@@ -106,7 +109,11 @@ class AuthController {
   }
 
   User? getCurrentUser() {
-    return _auth.currentUser;
+    final User? user = _auth.currentUser;
+    if (user != null) {
+      return UserModel.fromFirebaseUser(user);
+    }
+    return null;
   }
 
   // Fungsi untuk menampilkan dialog dengan pesan yang disesuaikan

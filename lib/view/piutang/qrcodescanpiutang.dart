@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:tugasakhir/controller/piutangcontroller.dart';
@@ -55,9 +56,23 @@ class _QRCodeScanPiutangState extends State<QRCodeScanPiutang> {
       final Map<String, dynamic> data = jsonDecode(qrCodeData);
       print('Decoded QR data: $data');
 
+      // Jika data mengandung hutang, maka valid
       if (data.containsKey('hutang')) {
-        return _buildPiutangDialog(data);
-      } else {
+        return _buildPiutangDialog(data); // Data valid, lanjutkan
+      }
+      // Jika data mengandung piutang, tampilkan error
+      else if (data.containsKey('piutang')) {
+        // Tampilkan pesan error jika QR code adalah piutang, bukan hutang
+        WidgetsBinding.instance!.addPostFrameCallback((_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('QR code ini adalah data Piutang, bukan Hutang')),
+          );
+        });
+        return Container(); // Jangan lakukan apa-apa
+      }
+      // Jika data tidak sesuai dengan format hutang/piutang yang diharapkan
+      else {
         throw FormatException('Data QR code tidak sesuai dengan Hutang');
       }
     } catch (e) {
@@ -80,11 +95,7 @@ class _QRCodeScanPiutangState extends State<QRCodeScanPiutang> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-                'Hutang Id: ${data['hutang']['hutangId'] ?? 'Data tidak tersedia'}'),
-            Text(
                 'Nama Pemberi Pinjam: ${data['hutang']['namaPemberiPinjam'] ?? 'Data tidak tersedia'}'),
-            Text(
-                'Nomor Telepon: ${data['hutang']['noteleponPemberiPinjam'] ?? 'Data tidak tersedia'}'),
             Text(
                 'Nominal Pinjam: ${data['hutang']['nominalPinjam'] ?? 'Data tidak tersedia'}'),
             Text(
@@ -92,11 +103,13 @@ class _QRCodeScanPiutangState extends State<QRCodeScanPiutang> {
             Text(
                 'Tanggal Jatuh Tempo: ${data['hutang']['tanggalJatuhTempo'] ?? 'Data tidak tersedia'}'),
             Text(
-                'Deskripsi: ${data['hutang']['deskripsi'] ?? 'Data tidak tersedia'}'),
+                'Deskripsi: ${data['hutang']['deskripsi']?.isNotEmpty == true ? data['hutang']['deskripsi'] : 'Data tidak tersedia'}'),
             Text(
-                'Total Bayar: ${data['hutang']['totalBayar'] ?? 'Data tidak tersedia'}'),
+                'Total Bayar: ${data['hutang']['totalBayar']?.isNotEmpty == true ? data['hutang']['totalBayar'] : 'Data tidak tersedia'}'),
             Text(
-                'Sisa Hutang: ${data['hutang']['sisaHutang'] ?? 'Data tidak tersedia'}'),
+                'Sisa Hutang: ${data['hutang']['sisaHutang']?.isNotEmpty == true ? data['hutang']['sisaHutang'] : 'Data tidak tersedia'}'),
+            Text(
+                'Status: ${data['hutang']['status']?.isNotEmpty == true ? data['hutang']['status'] : 'Data tidak tersedia'}'),
           ],
         ),
       ),
@@ -104,6 +117,7 @@ class _QRCodeScanPiutangState extends State<QRCodeScanPiutang> {
         TextButton(
           onPressed: () {
             Navigator.of(context).pop();
+            setState(() {});
             _handleConvertAndSavePiutangData(data);
           },
           child: const Text('Simpan Data'),
@@ -133,27 +147,29 @@ class _QRCodeScanPiutangState extends State<QRCodeScanPiutang> {
     });
   }
 
-  void _handleConvertAndSavePiutangData(Map<String, dynamic> data) {
+  Future<void> _handleConvertAndSavePiutangData(
+      Map<String, dynamic> data) async {
     try {
+      String userId = data['hutang']['userId'] ?? '';
+      String namaPeminjam = await _fetchUsername(userId);
+
       final PiutangModel piutangModel = PiutangModel(
         piutangId: data['hutang']['hutangId'] ?? '',
-        namaPeminjam: data['hutang']['namaPemberiPinjam'] ?? '',
-        noteleponPeminjam: data['hutang']['noteleponPemberiPinjam'] ?? '',
+        namaPeminjam: namaPeminjam,
         nominalDiPinjam: data['hutang']['nominalPinjam'] ?? 0.0,
         tanggalDiPinjam: data['hutang']['tanggalPinjam'] ?? '',
         tanggalJatuhTempo: data['hutang']['tanggalJatuhTempo'] ?? '',
         deskripsi: data['hutang']['deskripsi'] ?? '',
         totalBayar: data['hutang']['totalBayar'] ?? '',
         sisaHutang: data['hutang']['sisaHutang'] ?? '',
+        status: data['hutang']['status'] ?? '',
       );
 
       _piutangController.addPiutang(piutangModel).then((_) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Data Piutang berhasil disimpan')),
         );
-        // // Panggil fungsi untuk memonitor perubahan Hutang terkait Piutang
-        // _piutangController.listenToHutangChanges(data['hutang']['hutangId']);
-        // HutangController().listenToHutangChanges(data['hutang']['hutangId']);
+        setState(() {});
 
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const Piutang()),
@@ -169,5 +185,14 @@ class _QRCodeScanPiutangState extends State<QRCodeScanPiutang> {
         const SnackBar(content: Text('Gagal menyimpan data')),
       );
     }
+  }
+
+  Future<String> _fetchUsername(String userId) async {
+    if (userId.isEmpty) return 'N/A'; // Handle empty userId
+
+    DocumentSnapshot userDoc =
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
+
+    return userDoc['uName'] ?? 'N/A'; // Ambil username
   }
 }

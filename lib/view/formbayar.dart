@@ -36,20 +36,20 @@ class _FormBayarState extends State<FormBayar> {
   double sisaPiutangDouble = 0.0;
 
   TextEditingController nominalBayarController = TextEditingController();
-  TextEditingController _tanggalBayarController = TextEditingController();
+  TextEditingController tanggalBayarController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     fetchInitialValues();
-    _tanggalBayarController.text = formattedDate;
+    tanggalBayarController.text = formattedDate;
     tanggalBayar = formattedDate; // Initialize tanggalBayar with today's date
   }
 
   @override
   void dispose() {
     nominalBayarController.dispose();
-    _tanggalBayarController.dispose();
+    tanggalBayarController.dispose();
     super.dispose();
   }
 
@@ -158,6 +158,11 @@ class _FormBayarState extends State<FormBayar> {
                                     .replaceAll('.', '')
                                     .replaceAll(',', '')) ??
                                 0.0;
+
+                            // Validasi untuk nominal 0
+                            if (parsedValue == 0.0) {
+                              return 'Nominal bayar tidak boleh nol.';
+                            }
                             if (widget.hutangId != null) {
                               if (parsedValue > sisaHutangDouble) {
                                 return 'Nominal bayar tidak boleh lebih besar dari sisa hutang (${NumberFormat.currency(locale: 'id_ID').format(sisaHutangDouble)})';
@@ -218,7 +223,7 @@ class _FormBayarState extends State<FormBayar> {
                       Container(
                         width: 300,
                         child: TextFormField(
-                          controller: _tanggalBayarController,
+                          controller: tanggalBayarController,
                           decoration: InputDecoration(
                             hintText: formattedDate,
                             border: OutlineInputBorder(
@@ -240,7 +245,7 @@ class _FormBayarState extends State<FormBayar> {
                                   DateFormat('yyyy-MM-dd').format(pickedDate);
                               setState(() {
                                 tanggalBayar = formattedPickedDate;
-                                _tanggalBayarController.text =
+                                tanggalBayarController.text =
                                     formattedPickedDate;
                               });
                             }
@@ -279,6 +284,7 @@ class _FormBayarState extends State<FormBayar> {
                                   print('Piutang bayar added successfully');
                                 }
                                 Navigator.pop(context);
+                                setState(() {});
                               } catch (e) {
                                 print('Error adding bayar: $e');
                               }

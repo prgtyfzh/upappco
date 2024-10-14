@@ -54,7 +54,7 @@ class _QRCodeHutangState extends State<QRCodeHutang> {
     final hutang = await _hutangController.getHutangById(widget.hutangId);
 
     final data = {
-      'hutang': hutang.toMap(),
+      'hutang': hutang,
     };
 
     return data;
