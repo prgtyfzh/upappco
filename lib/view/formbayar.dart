@@ -159,9 +159,8 @@ class _FormBayarState extends State<FormBayar> {
                                     .replaceAll(',', '')) ??
                                 0.0;
 
-                            // Validasi untuk nominal 0
-                            if (parsedValue == 0.0) {
-                              return 'Nominal bayar tidak boleh nol.';
+                            if (parsedValue <= 200) {
+                              return 'Nominal bayar harus lebih dari 200 rupiah!';
                             }
                             if (widget.hutangId != null) {
                               if (parsedValue > sisaHutangDouble) {
